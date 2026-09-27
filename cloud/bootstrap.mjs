@@ -23,6 +23,9 @@ try {
   let dockerReady=false;
   for(let i=0;i<60;i++) {try {await command('docker',['info']);dockerReady=true;break;}catch {await new Promise(r=>setTimeout(r,1000));}}
   if(!dockerReady)throw new Error('Docker daemon failed to start inside Vercel Sandbox');
+  await status({ready:false,message:'Verifying isolated container execution under the VM resource limits…'});
+  await command('docker',['run','--rm','--network','none','--cap-drop','ALL','--security-opt','no-new-privileges','--read-only','--pids-limit','256','--cpus','2','node:24-alpine','node','-e','console.log("PROOFRUN_CLOUD_EXECUTION_VERIFIED")']);
+  process.env.PROOFRUN_CLOUD_VM='1';
   const ca='/etc/pki/ca-trust/source/anchors/vercel-proxy-ca.pem';
   if(existsSync(ca)) {process.env.NODE_EXTRA_CA_CERTS=ca;process.env.PROOFRUN_CONTAINER_CA=ca;}
   await status({ready:false,message:'Installing IBM Bob Shell and accepting the owner-approved license…'});

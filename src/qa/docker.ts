@@ -38,8 +38,9 @@ const limits = [
   "ALL",
   "--security-opt",
   "no-new-privileges",
-  "--memory",
-  "1536m",
+  // Vercel's threaded cgroup tree cannot delegate memory to nested containers.
+  // Each visitor instead receives a Firecracker VM with a hard 4 GiB memory cap.
+  ...(process.env.PROOFRUN_CLOUD_VM === "1" ? [] : ["--memory", "1536m"]),
   "--cpus",
   "2",
   "--pids-limit",

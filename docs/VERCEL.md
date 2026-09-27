@@ -18,3 +18,7 @@ Cloud folder/ZIP submissions are limited to 3 MB before JSON encoding (2 MB per 
 ## Deployment
 
 Import the repository, select Other, and retain vercel.json build/output settings. Add the server variables and deploy. Open the URL, enter the access code, then upload a project. Bootstrap progress is displayed before the normal testing workspace opens. Never commit an environment file or share the key with judges.
+
+## Cloud resource enforcement
+
+The Vercel universal image uses a threaded cgroup root. It cannot delegate a memory controller to nested Docker containers. Cloud mode therefore enforces memory at the private Firecracker VM boundary (4 GiB hard cap), while Docker retains CPU and PID limits, dropped capabilities, read-only filesystems and isolated networks. Local mode keeps its 1536 MB per-container memory limit. Bootstrap must execute an actual restricted container successfully before declaring the environment ready.

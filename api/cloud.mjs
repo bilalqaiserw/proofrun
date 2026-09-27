@@ -8,7 +8,7 @@ async function launch(sandbox, name, secret) {
   if(!script) throw new Error('Repository checkout did not contain the cloud launcher.');
   await sandbox.writeFiles([{path:cwd+'/.cloud-started',content:Buffer.from('started')}]);
   await sandbox.runCommand({cmd:'node',args:['cloud/bootstrap.mjs'],cwd,sudo:true,detached:true,timeoutMs:45*60_000,
-    env:{BOBSHELL_API_KEY:process.env.BOBSHELL_API_KEY,BOB_TEAM_ID:process.env.BOB_TEAM_ID || '',BOB_MAX_COST:process.env.BOB_MAX_COST || '5',PROOFRUN_GATEWAY_KEY:sign(name,secret),PROOFRUN_BOB_ACCEPT_LICENSE:'1',PORT:'3000'}});
+    env:{BOBSHELL_API_KEY:process.env.BOBSHELL_API_KEY,BOB_TEAM_ID:process.env.BOB_TEAM_ID || '',BOB_MAX_COST:process.env.BOB_MAX_COST || '5',PROOFRUN_GATEWAY_KEY:sign(name,secret),PROOFRUN_BOB_ACCEPT_LICENSE:'1',PROOFRUN_CLOUD_VM:'1',PORT:'3000'}});
 }
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
@@ -21,11 +21,6 @@ export default async function handler(req, res) {
     const cookies = Object.fromEntries((req.headers.cookie || '').split(';').map(c => c.trim().split('=')));
     let session = decodeSession(cookies.proofrun_session || '', secret);
     const action = req.query.action;
-    if (action === 'runtime-diagnostics' && session) {
-      const sandbox=await Sandbox.get({name:session.name});
-      const check=await sandbox.runCommand({cmd:'node',args:['-e',"const f=require('node:fs');const paths=['/sys/fs/cgroup/cgroup.type','/sys/fs/cgroup/cgroup.controllers','/sys/fs/cgroup/cgroup.subtree_control','/sys/fs/cgroup/docker/cgroup.type','/sys/fs/cgroup/docker/cgroup.controllers','/proc/1/cgroup','/proc/self/cgroup'];const data={};for(const p of paths){try{data[p]=f.readFileSync(p,'utf8')}catch(e){data[p]=e.code}}console.log(JSON.stringify(data))"],sudo:true,timeoutMs:10000});
-      return reply(200,JSON.parse(await check.stdout()));
-    }
     if (action === 'restart') {
       if(req.method!=='POST' || req.headers['x-proofrun']!=='1')return reply(403,{error:'Workspace request required.'});
       if(session) {
