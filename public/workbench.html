@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ProofRun - Project workspace</title>
+    <meta
+      name="description"
+      content="Analyze, run, test and repair your project with IBM Bob and isolated execution."
+    />
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/workbench.css" />
+  </head>
+  <body>
+    <aside class="sidebar">
+      <a class="brand" href="/"
+        ><span class="mark">P<span>·</span></span
+        >ProofRun</a
+      >
+      <div class="workspace-name">
+        <div>Project workspaces<small>Source to verified repair</small></div>
+      </div>
+      <button id="new-project" class="primary-button">Test My App</button>
+      <nav id="project-list" aria-label="Projects"></nav>
+      <button id="clear-projects" class="text-button" hidden>Clear all</button>
+      <div class="sidebar-footer">
+        <button id="setup-button" class="text-button">
+          Connection &amp; setup
+        </button>
+        <p>IBM Bob reasoning<br />Isolated container execution</p>
+      </div>
+    </aside>
+    <div class="page">
+      <header class="topbar">
+        <div>
+          ProofRun <span>/</span> <strong id="breadcrumb">Your projects</strong>
+        </div>
+        <span id="connection-pill" class="outcome">Checking setup</span>
+      </header>
+      <main>
+        <section id="setup-banner" class="setup-banner" hidden>
+          <div>
+            <strong>Finish connecting ProofRun</strong>
+            <p id="setup-message"></p>
+          </div>
+          <a
+            id="open-updated-app"
+            class="primary-button"
+            href="http://localhost:3003/"
+            hidden
+            >Open updated app</a
+          >
+          <button id="show-setup" class="secondary-button">
+            Setup instructions
+          </button>
+        </section>
+        <section id="welcome">
+          <div class="page-heading">
+            <div>
+              <div class="small-label">BEFORE YOU SHIP</div>
+              <h1>Put your software to the test.</h1>
+              <p>Bring your project. See what fails. Decide what changes.</p>
+            </div>
+          </div>
+          <article class="welcome-card">
+            <h2>Your project. One workspace.</h2>
+            <p>
+              ProofRun asks Bob how your software works, prepares an isolated
+              environment, and exercises real behavior. Every failure has
+              evidence. Every source change needs your approval.
+            </p>
+            <button id="welcome-upload" class="primary-button">
+              Test My App →
+            </button>
+            <div class="welcome-flow">
+              <span>Analyze</span><span>Run &amp; test</span
+              ><span>Review findings</span><span>Approve &amp; verify</span>
+            </div>
+          </article>
+          <p class="workflow-footnote">
+            Upload any source type. Execution depends on an available Linux
+            runtime and the services your project needs. Unsupported
+            requirements are reported.
+          </p>
+        </section>
+        <section id="workspace" hidden>
+          <div class="workspace-heading">
+            <div>
+              <div class="small-label">TESTING WORKSPACE</div>
+              <h1 id="project-name"></h1>
+              <p id="project-meta"></p>
+            </div>
+            <div class="workspace-actions">
+              <button id="start-run" class="primary-button">
+                Analyze &amp; test</button
+              ><button id="cancel-run" class="secondary-button" hidden>
+                Stop run</button
+              ><button id="export-report" class="text-button">
+                Download report</button
+              ><button id="export-project" class="text-button">
+                Download working copy
+              </button>
+            </div>
+          </div>
+          <div class="pipeline" id="pipeline"></div>
+          <div class="job-status">
+            <span id="phase-badge" class="outcome"></span>
+            <p id="job-message"></p>
+            <p id="reasoning-progress" class="workflow-footnote" hidden></p>
+          </div>
+          <p id="analysis-warnings" class="setup-banner" hidden></p>
+          <section
+            id="next-step"
+            class="next-step"
+            aria-label="Next step"
+            hidden
+          >
+            <div>
+              <h2 id="next-step-title"></h2>
+              <p id="next-step-description"></p>
+            </div>
+            <button id="repair-action" class="primary-button"></button>
+          </section>
+          <nav class="workspace-tabs" aria-label="Workspace views">
+            <button data-view="overview" class="active">Overview</button
+            ><button data-view="issues">
+              Issues <span id="issue-count">0</span></button
+            ><button data-view="tests">Tests</button
+            ><button data-view="logs">Logs</button
+            ><button data-view="validation">Validation</button>
+          </nav>
+          <section id="view-overview">
+            <div id="metrics" class="metrics"></div>
+            <article class="purpose-document">
+              <div class="small-label">BOB'S UNDERSTANDING</div>
+              <h2>What this program does</h2>
+              <p id="analysis-summary">
+                Analysis will appear here after Bob reads your project.
+              </p>
+              <details id="capabilities-details" hidden>
+                <summary>What users can do</summary>
+                <ul id="analysis-capabilities" class="capabilities-list"></ul>
+              </details>
+            </article>
+            <article class="purpose-document languages-document">
+              <h3>Languages used</h3>
+              <div id="analysis-languages"></div>
+              <p class="workflow-footnote">
+                Detected from your source files, including tests and examples.
+                Expand a language to see Bob's explanation or its source files.
+              </p>
+              <details class="report-details">
+                <summary>Frameworks, environment plan and coverage</summary>
+                <div id="analysis-stack"></div>
+                <div id="plan-details"></div>
+              </details>
+            </article>
+            <div id="running-test" class="running-test" hidden></div>
+            <article class="purpose-document source-summary">
+              <h3>Your source</h3>
+              <p id="source-summary"></p>
+              <details>
+                <summary>Inspect submitted files</summary>
+                <div id="file-list"></div>
+              </details>
+              <p class="workflow-footnote">
+                Tests run on isolated copies. Approved patches update this
+                workspace's source; download the working copy to take changes
+                back to your original project.
+              </p>
+            </article>
+          </section>
+          <section id="view-issues" hidden>
+            <div class="section-heading">
+              <div>
+                <h2>Findings &amp; proposed repairs</h2>
+                <p>
+                  Inspect the evidence and diffs. Edit or reject individual proposals, then use Approve &amp; repair all above to apply the remaining changes.
+                </p>
+              </div>
+            </div>
+            <div id="issues"></div>
+          </section>
+          <section id="view-tests" hidden>
+            <div class="section-heading">
+              <div>
+                <h2>Executed tests</h2>
+                <p>
+                  Real inputs, observed outcomes, and exact reproduction
+                  sequences.
+                </p>
+              </div>
+            </div>
+            <div id="tests"></div>
+          </section>
+          <section id="view-logs" hidden>
+            <div class="section-heading">
+              <div>
+                <h2>Execution log</h2>
+                <p>
+                  Setup, build, commands, runtime output and pipeline events.
+                </p>
+              </div>
+            </div>
+            <pre id="logs" class="log-console"></pre>
+          </section>
+          <section id="view-validation" hidden>
+            <div class="section-heading">
+              <div>
+                <h2>Validation after repair</h2>
+                <p>
+                  The original tests are preserved. New failures are tracked as
+                  regressions.
+                </p>
+              </div>
+              <button id="retest" class="secondary-button">
+                Re-run unchanged tests
+              </button>
+            </div>
+            <div id="validations"></div>
+          </section>
+        </section>
+        <p
+          id="status"
+          class="workspace-status"
+          role="status"
+          aria-live="polite"
+        ></p>
+      </main>
+    </div>
+    <dialog id="upload-dialog">
+      <form id="upload-form">
+        <div class="dialog-heading">
+          <h2>Test your application</h2>
+          <button type="button" data-close="upload-dialog" class="text-button">
+            Close
+          </button>
+        </div>
+        <p>
+          Choose the project folder. Source, configuration, assets and tests are
+          copied into a new workspace.
+        </p>
+        <label class="form-label"
+          >Project name<input
+            id="upload-name"
+            placeholder="My application"
+            maxlength="100" /></label
+        ><button id="choose-folder" type="button" class="secondary-button">
+          Choose project folder</button
+        ><input
+          id="source-folder"
+          type="file"
+          webkitdirectory
+          multiple
+          hidden
+        />
+        <p id="upload-selection">No folder selected</p>
+        <details class="report-details">
+          <summary>Connect a local folder or upload a ZIP</summary>
+          <label class="form-label"
+            >Absolute source folder path<input
+              id="local-path"
+              placeholder="C:\Projects\my-app or /home/me/my-app"
+          /></label>
+          <p>ProofRun copies the source folder into an isolated workspace.</p>
+          <label class="form-label"
+            >Project ZIP<input id="zip-file" type="file" accept=".zip"
+          /></label>
+        </details>
+        <p class="workflow-footnote">
+          Up to 2,000 files / 128 MB, with 32 MB per file. Dependency folders,
+          symlinks and credential files are excluded. Bob receives bounded
+          source context through your configured IBM account.
+        </p>
+        <p id="upload-error" class="error-text" role="alert"></p>
+        <button id="submit-project" class="primary-button" type="submit">
+          Create workspace &amp; test →
+        </button>
+      </form>
+    </dialog>
+    <dialog id="setup-dialog">
+      <div class="dialog-heading">
+        <h2>Connect Bob &amp; execution</h2>
+        <button data-close="setup-dialog" class="text-button">Close</button>
+      </div>
+      <div id="setup-state"></div>
+      <h3>1. Configure your key on the server</h3>
+      <p>
+        Create <code>.env</code> beside ProofRun's <code>package.json</code>.
+        Add:
+      </p>
+      <pre>BOBSHELL_API_KEY=YOUR_IBM_BOB_INFERENCE_KEY</pre>
+      <p>
+        The browser never receives the key. Restart ProofRun after saving it. Do
+        not put your key in an uploaded project.
+      </p>
+      <p>
+        Use an IBM Bob Inference key. General keys also require
+        <code>BOB_TEAM_ID</code> in the same server <code>.env</code> file.
+      </p>
+      <h3>2. Install Bob Shell</h3>
+      <p>If it is missing, run this from ProofRun's folder:</p>
+      <pre>npm run setup:bob</pre>
+      <p>
+        Complete IBM's first-run license/sign-in setup if prompted. Bob runs
+        without file or command tools for this integration.
+      </p>
+      <h3>3. Start Linux containers</h3>
+      <p>
+        Install and start Docker Desktop with Linux containers, or use Docker
+        Engine on Linux. On Windows, Docker may require WSL 2 and a restart.
+      </p>
+      <h3>4. Start ProofRun</h3>
+      <pre>npm start</pre>
+      <button id="refresh-setup" class="secondary-button">
+        Check connection again
+      </button>
+      <p id="setup-error" role="status"></p>
+    </dialog>
+    <dialog id="edit-dialog">
+      <div class="dialog-heading">
+        <h2>Edit proposed repair</h2>
+        <button data-close="edit-dialog" class="text-button">Cancel</button>
+      </div>
+      <p>
+        Edit the replacement contents. Saving creates a new diff revision;
+        source is unchanged until you approve that revision.
+      </p>
+      <div id="edit-files"></div>
+      <p id="edit-error" class="error-text" role="alert"></p>
+      <button id="save-edited-fix" class="primary-button">
+        Save revised proposal
+      </button>
+    </dialog>
+    <dialog id="source-dialog">
+      <div class="dialog-heading">
+        <h2 id="source-title">Source file</h2>
+        <button data-close="source-dialog" class="text-button">Close</button>
+      </div>
+      <pre id="source-content" class="source-code"></pre>
+    </dialog>
+    <script type="module" src="/workbench.js"></script>
+  </body>
+</html>

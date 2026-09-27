@@ -1,0 +1,12 @@
+{
+  "date": "2026-09-27",
+  "command": "npm test",
+  "passed": 40,
+  "failed": 0,
+  "skipped": 0,
+  "durationSeconds": 11.059,
+  "reasoning": "Explicit deterministic fixture substitute, not live Bob inference",
+  "execution": "Owned real HTTP and child process fixtures, not production Docker",
+  "batchRepair": "Two independent actual application defects repaired through one API approval and one unchanged retest; rejected proposal excluded",
+  "note": "Rerun after source organization and Bob environment-name compatibility update. 40 passed, 0 failed, 0 skipped. The setup wrapper also launched Bob Shell 2.0.5 successfully with --version."
+}

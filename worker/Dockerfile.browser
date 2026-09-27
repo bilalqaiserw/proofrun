@@ -1,0 +1,6 @@
+FROM mcr.microsoft.com/playwright:v1.63.0-noble
+WORKDIR /runner
+RUN npm install --ignore-scripts --no-audit --no-fund playwright@1.63.0
+COPY browser.mjs /runner/browser.mjs
+USER pwuser
+ENTRYPOINT ["node", "/runner/browser.mjs"]

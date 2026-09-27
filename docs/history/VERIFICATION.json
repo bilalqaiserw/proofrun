@@ -1,0 +1,146 @@
+{
+  "date": "2026-09-27",
+  "platform": "Windows",
+  "node": "24.17.0",
+  "bobShell": {
+    "installed": true,
+    "version": "2.0.5",
+    "vendorChecksumVerified": true,
+    "versionAndHelpChecked": true,
+    "inferenceVerified": true,
+    "inferenceScope": "Plain-English purpose and implementation-language reasoning for supplied Understand Anything source; not the full repair gate"
+  },
+  "automatedFixtureIntegration": {
+    "command": "npm test",
+    "passed": 17,
+    "failed": 0,
+    "skipped": 0,
+    "usesRealHttpAndProcesses": true,
+    "reasoning": "deterministic test substitute",
+    "execution": "strictly owned fixture processes; not production Docker"
+  },
+  "dockerGate": {
+    "command": "npm run test:docker",
+    "passed": 0,
+    "failed": 0,
+    "skipped": 1,
+    "reason": "Docker engine unavailable",
+    "note": "Historical initial skip; targeted production Docker HTTP and snapshot execution now verified separately"
+  },
+  "liveBobGate": {
+    "command": "npm run test:live",
+    "passed": 0,
+    "failed": 0,
+    "skipped": 1,
+    "reason": "BOBSHELL_API_KEY not configured; Docker engine unavailable",
+    "note": "Historical initial skip; complete live repair gate not rerun in this performance task"
+  },
+  "browser": {
+    "productionIntakeInspected": true,
+    "internalNavigationVerified": true,
+    "missingSetupBlockedCorrectly": true,
+    "repairEvidenceAndDiffInspected": true,
+    "editAndApprovalVerified": true,
+    "unchangedRetestPassed": true,
+    "repairHarness": "explicit deterministic reasoning substitute with owned real HTTP fixture; not live Bob or Docker",
+    "consoleErrorsObserved": 0,
+    "purposeAndLanguageSectionsVerified": true
+  },
+  "pending": [
+    "Pass broader production Docker/browser and live Bob repair gates",
+    "Validate database integrations with disposable fixtures"
+  ],
+  "targetedDockerPerformance": {
+    "engineVersion": "29.8.0",
+    "passedHttpWorkflows": 6,
+    "passedExistingChecks": 2,
+    "contractsUnchanged": true,
+    "isolatedWorkspaceAndTmpChecks": 6,
+    "installationsBefore": 7,
+    "installationsAfter": 1,
+    "priorSetupCommandMs": 510526,
+    "optimizedSetupCommandMs": 64517,
+    "optimizedSetupExecutionCleanupMs": 142702.72770000002,
+    "bobReasoningIncluded": false,
+    "finalSnapshotModesAndSymlinksVerified": true,
+    "finalSnapshotHardlinksVerified": true
+  },
+  "largeProjectIntake": {
+    "status": "passed",
+    "httpStatus": 201,
+    "project": "Understand-Anything-main",
+    "files": 514,
+    "bytes": 33052530,
+    "requestBytes": 44128196,
+    "allFileHashesPreserved": true,
+    "largeAssets": [
+      {
+        "path": "Understand-Anything-main/homepage/public/images/overview-domain.gif",
+        "size": 8381386,
+        "hashPreserved": true
+      },
+      {
+        "path": "Understand-Anything-main/homepage/public/images/overview-structural.gif",
+        "size": 10453855,
+        "hashPreserved": true
+      }
+    ],
+    "aiExcerptCount": 43,
+    "aiTextChars": 260000,
+    "applicationExecutionPerformed": false
+  },
+  "bobInstallationDetection": {
+    "installed": true,
+    "version": "2.0.5",
+    "keyConfigured": true,
+    "checkMs": 9,
+    "method": "module-relative local installation and package metadata; no CLI startup"
+  },
+  "timeoutRecovery": {
+    "passed": true,
+    "realProcessTimeout": true,
+    "followingChecksUseFreshSession": true,
+    "timeoutReportedAsInconclusive": true
+  },
+  "understandAnythingExecution": {
+    "complete": true,
+    "runtime": "node22",
+    "projectSourceUnmodified": true,
+    "purposeReasoning": "Actual IBM Bob Shell API call",
+    "commands": [
+      {
+        "skippedCases": 0,
+        "title": "Lint (ESLint across monorepo)",
+        "status": "passed",
+        "cases": null,
+        "seconds": 24.1,
+        "exitCode": 0
+      },
+      {
+        "skippedCases": 0,
+        "title": "Run core Vitest tests",
+        "status": "passed",
+        "cases": 1013,
+        "seconds": 25.1,
+        "exitCode": 0
+      },
+      {
+        "skippedCases": 4,
+        "title": "Run root Vitest tests (skill + benchmark + hooks + install + viewer tests)",
+        "status": "passed",
+        "cases": 789,
+        "seconds": 353.4,
+        "exitCode": 0
+      },
+      {
+        "skippedCases": 0,
+        "title": "Run Python skill helper unittests",
+        "status": "passed",
+        "cases": 106,
+        "seconds": 2.7,
+        "exitCode": 0
+      }
+    ],
+    "scope": "Existing CI suites only; no generated adversarial or interactive browser workflows claimed"
+  }
+}

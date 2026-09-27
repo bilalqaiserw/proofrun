@@ -1,0 +1,14 @@
+{
+  "name": "proofrun",
+  "version": "5.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24 <25" },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env src/server.ts",
+    "setup:bob": "node scripts/install-bob.mjs",
+    "test": "node --test tests/qa-*.test.ts",
+    "test:docker": "node --test tests/docker-live.test.ts",
+    "test:live": "node --env-file-if-exists=.env --test tests/bob-live.test.ts"
+  }
+}

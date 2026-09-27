@@ -1,0 +1,13 @@
+# Long Description: Problem & Solution Statement
+
+Developers often reach release day with passing unit tests but little evidence that an application behaves correctly during real user journeys. Testing an unfamiliar repository requires understanding its purpose, recreating its environment, choosing meaningful inputs, reproducing failures and checking repairs. This fragmented workflow is especially difficult for solo developers and small teams working with AI-generated code.
+
+ProofRun is an AI software QA workspace powered by IBM Bob. A developer chooses a project folder or uploads a ZIP. Inside one web application, Bob explains what the software is meant to do and proposes how to install, build, start and test it. A separate Docker execution layer runs the project in disposable environments and exercises generated API sequences, browser interactions or command-line checks. Practical inputs include normal flows, documented boundaries, malformed requests and unexpected values where the project supports them.
+
+Each finding connects the failure to its triggering input, reproduction steps, expected and actual behavior, execution logs and screenshots when relevant. Bob analyzes that evidence to suggest a likely cause and a concrete source diff, including risks. Users can inspect, edit or reject proposals. The main Approve & repair all button explicitly approves the remaining current revisions, applies compatible changes to a managed copy, and starts one verification pass. Original project folders stay untouched.
+
+ProofRun's distinctive approach keeps test expectations fixed during repair verification. It checks previously passing flows for regressions and separates confirmed application failures from environment problems, incorrect generated expectations and incomplete execution. The AI explains and proposes, while the execution layer supplies the observations. Reusing an immutable prepared build reduces repeated setup work while independent workflows receive fresh state.
+
+In the supplied, deliberately faulty checkout example, existing unit tests pass while an order of exactly $100 incorrectly receives a $5 delivery charge. Actual Bob-generated API and browser checks exposed the boundary defect. After explicit approval of the source repair, all 11 saved application checks passed with no regressions.
+
+The result is a reproducible testing, debugging and approval workflow with a readable final report. ProofRun supports configured Linux runtimes and reports unsupported requirements as coverage gaps. It does not claim to infer every undocumented requirement or detect every defect in arbitrary software.
