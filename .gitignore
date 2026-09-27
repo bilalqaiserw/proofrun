@@ -123,3 +123,6 @@ build/
 .proofrun-data/
 /work/
 reports/
+
+vercel-public/
+.cloud-status.json

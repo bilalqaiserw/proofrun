@@ -141,6 +141,12 @@ class DockerSession implements Session {
         "max-file=1",
         "--log-opt",
         "compress=false",
+        ...(process.env.PROOFRUN_CONTAINER_CA ? [
+          "--mount", "type=bind,source=" + process.env.PROOFRUN_CONTAINER_CA + ",target=/proofrun-ca.pem,readonly",
+          "-e", "NODE_EXTRA_CA_CERTS=/proofrun-ca.pem",
+          "-e", "REQUESTS_CA_BUNDLE=/proofrun-ca.pem",
+          "-e", "SSL_CERT_FILE=/proofrun-ca.pem",
+        ] : []),
         ...args.slice(1),
       ];
     return requireSuccess(this.binary, args, {
