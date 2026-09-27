@@ -8,10 +8,10 @@ ProofRun reads a submitted project, plans its execution, runs practical tests in
 
 ## Start here
 
-`powershell
+```powershell
 git clone https://github.com/bilalqaiserw/proofrun.git
 cd proofrun
-`
+```
 
 1. Install **Node.js 24**, Docker Desktop with **Linux containers**, and IBM Bob Shell.
 2. Follow [SETUP.md](SETUP.md) for Docker, WSL, account, license and API configuration.
@@ -24,6 +24,8 @@ There are no application npm packages to install. `npm run setup:bob` installs B
 
 - [Project description](PROJECT.md): problem, users, workflow and architecture.
 - [Complete setup guide](SETUP.md): installation, key configuration, first run and troubleshooting.
+- [Vercel deployment](docs/VERCEL.md): private cloud execution, server secrets and session limits.
+- [Live cloud verification](docs/CLOUD_VERIFICATION.md): measured upload, test, approval, repair and retest evidence.
 - [Architecture](docs/ARCHITECTURE.md) and [API](docs/API.md).
 - [Verification and limits](docs/TESTING.md).
 - [Video recording guide](docs/DEMO_90_SECONDS.md).
@@ -73,7 +75,7 @@ npm run test:docker
 npm run test:live
 ```
 
-The latest local regression suite passed **40 tests, 0 failures and 0 skips**. It uses labelled reasoning substitutes and owned fixtures, with real HTTP requests and child processes. Separate earlier production Bob/Docker/Chromium evidence recorded **11 unchanged application checks passing after approval**, with **0 regressions**, on the labelled checkout fixture. These are different measurements. Live gates require Docker/Bob and may consume Bobcoins. A skipped gate does not establish a pass.
+The latest local regression suite passed **42 tests, 0 failures and 0 skips**. It uses labelled reasoning substitutes and owned fixtures, with real HTTP requests and child processes. Separate earlier production Bob/Docker/Chromium evidence recorded **11 unchanged application checks passing after approval**, with **0 regressions**, on the labelled checkout fixture. These are different measurements. Live gates require Docker/Bob and may consume Bobcoins. A skipped gate does not establish a pass.
 
 ## Scope
 

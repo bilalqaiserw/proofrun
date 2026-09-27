@@ -1,6 +1,7 @@
 import { Sandbox } from '@vercel/sandbox';
 import { randomUUID } from 'node:crypto';
 import { encodeSession, decodeSession, sign, validCode } from '../cloud/session.mjs';
+import { allowedWorkspacePath } from '../cloud/routes.mjs';
 
 async function launch(sandbox, name, secret) {
   const cwd = sandbox.cwd + '/proofrun';
@@ -59,7 +60,7 @@ export default async function handler(req, res) {
     }
     if (!session) return reply(401,{error:'Cloud session expired. Refresh the page and enter your access code.'});
     const path = req.query.path;
-    if (typeof path !== 'string' || !/^(status|projects)(\/[-a-zA-Z0-9]+)*$/.test(path)) return reply(404,{error:'Unknown workspace endpoint.'});
+    if (!allowedWorkspacePath(path)) return reply(404,{error:'Unknown workspace endpoint.'});
     if (!['GET','POST','DELETE'].includes(req.method)) return reply(405,{error:'Unsupported method.'});
     if (req.method !== 'GET' && req.headers['x-proofrun'] !== '1') return reply(403,{error:'Workspace request required.'});
     let body = req.body;
