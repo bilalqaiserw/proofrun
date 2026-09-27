@@ -14,7 +14,7 @@ The archive contains source, tests, the labelled checkout example, PROJECT.md, S
 
 ## Before submitting
 
-- [ ] Publish the source to your public repository and use that real URL in the submission form. This task does not publish a repository.
+- [x] Source published to https://github.com/bilalqaiserw/proofrun (public). Use this repository URL in the submission form.
 - [ ] Include all relevant Bob IDE task summaries. One supplied summary is included; capture additional tasks if applicable.
 - [ ] Inspect screenshots for credentials and private information before publication.
 - [ ] Record the running application's detection, diff approval and unchanged verification. The deck and screenshots support the video but do not replace the working demo.
