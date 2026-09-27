@@ -13,4 +13,5 @@ test('cloud access code requires eight characters and exact match',()=>{
  assert.equal(validCode('abcdefgh','abcdefgh'),true);
  assert.equal(validCode('wrongkey','abcdefgh'),false);
  assert.equal(validCode('short','short'),false);
+ assert.equal(validCode('ébcdefgh','abcdefgh'),false);
 });

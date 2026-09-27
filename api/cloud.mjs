@@ -21,6 +21,11 @@ export default async function handler(req, res) {
     const cookies = Object.fromEntries((req.headers.cookie || '').split(';').map(c => c.trim().split('=')));
     let session = decodeSession(cookies.proofrun_session || '', secret);
     const action = req.query.action;
+    if (action === 'runtime-diagnostics' && session) {
+      const sandbox=await Sandbox.get({name:session.name});
+      const check=await sandbox.runCommand({cmd:'node',args:['-e',"const f=require('node:fs');const paths=['/sys/fs/cgroup/cgroup.type','/sys/fs/cgroup/cgroup.controllers','/sys/fs/cgroup/cgroup.subtree_control','/sys/fs/cgroup/docker/cgroup.type','/sys/fs/cgroup/docker/cgroup.controllers','/proc/1/cgroup','/proc/self/cgroup'];const data={};for(const p of paths){try{data[p]=f.readFileSync(p,'utf8')}catch(e){data[p]=e.code}}console.log(JSON.stringify(data))"],sudo:true,timeoutMs:10000});
+      return reply(200,JSON.parse(await check.stdout()));
+    }
     if (action === 'restart') {
       if(req.method!=='POST' || req.headers['x-proofrun']!=='1')return reply(403,{error:'Workspace request required.'});
       if(session) {

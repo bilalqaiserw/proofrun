@@ -15,5 +15,5 @@ export function decodeSession(value, secret, now = Date.now()) {
   } catch { return null; }
 }
 export function validCode(actual, expected) {
-  return typeof actual === 'string' && typeof expected === 'string' && expected.length >= 8 && actual.length === expected.length && timingSafeEqual(Buffer.from(actual), Buffer.from(expected));
+  return typeof actual === 'string' && typeof expected === 'string' && expected.length >= 8 && Buffer.byteLength(actual) === Buffer.byteLength(expected) && timingSafeEqual(Buffer.from(actual), Buffer.from(expected));
 }
