@@ -2,7 +2,7 @@ import {spawn} from 'node:child_process';
 import {writeFile,existsSync} from 'node:fs';
 import {promisify} from 'node:util';
 const write = promisify(writeFile);
-const cwd = '/vercel/sandbox';
+const cwd = process.cwd();
 const status = (data)=>write(cwd+'/.cloud-status.json',JSON.stringify(data));
 async function command(cmd,args,env=process.env) {
   await new Promise((resolve,reject)=> {const child=spawn(cmd,args,{cwd,env,stdio:'inherit'});child.on('error',reject);child.on('exit',code=>code===0?resolve():reject(new Error(cmd+' exited with '+code)));});

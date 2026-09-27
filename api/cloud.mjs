@@ -24,14 +24,14 @@ export default async function handler(req, res) {
           timeout:45 * 60_000, persistent:false, resources:{vcpus:2},
           source:{type:'git',url:'https://github.com/bilalqaiserw/proofrun.git',depth:1,revision:process.env.VERCEL_GIT_COMMIT_SHA || 'main'},
         });
-        await sandbox.runCommand({cmd:'node',args:['cloud/bootstrap.mjs'],cwd:'/vercel/sandbox',sudo:true,detached:true,timeoutMs:45*60_000,
+        await sandbox.runCommand({cmd:'node',args:['cloud/bootstrap.mjs'],cwd:sandbox.cwd,sudo:true,detached:true,timeoutMs:45*60_000,
           env:{BOBSHELL_API_KEY:secret,BOB_TEAM_ID:process.env.BOB_TEAM_ID || '',BOB_MAX_COST:process.env.BOB_MAX_COST || '5',PROOFRUN_GATEWAY_KEY:sign(name,secret),PORT:'3000'}});
         session = {name};
         res.setHeader('Set-Cookie', `proofrun_session=${encodeSession(name,secret)}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=2700`);
         return reply(202,{ready:false,message:'Preparing your private cloud testing environment. First startup installs Docker and IBM Bob.'});
       }
       const sandbox = await Sandbox.get({name:session.name});
-      const status = await sandbox.readFileToBuffer({path:'/vercel/sandbox/.cloud-status.json'});
+      const status = await sandbox.readFileToBuffer({path:'.cloud-status.json',cwd:sandbox.cwd});
       return reply(200,status ? JSON.parse(status.toString()) : {ready:false,message:'Starting cloud environment…'});
     }
     if (!session) return reply(401,{error:'Cloud session expired. Refresh the page and enter your access code.'});
