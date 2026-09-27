@@ -1,0 +1,4337 @@
+{
+  "recorded": true,
+  "project": "Shipping service",
+  "generatedAt": "2026-09-27T12:55:51.113Z",
+  "analysis": {
+    "summary": "Zero-dependency Node.js ESM project. No build step; source runs directly with `node`. The HTTP server reads index.html at startup, listens on PORT (default 3100), and delegates shipping calculations to shipping.mjs. Tests use the built-in Node test runner (node --test). Engine requirement is Node >=22; node:22-bookworm satisfies that. No package installation is needed — there are no dependencies declared in package.json.",
+    "purpose": "Shipping Service is a small checkout web application for online shoppers. A shopper enters their order subtotal on a form and instantly sees the delivery charge and final total before paying. Orders under $100 are charged a flat $5 shipping fee; orders of $100 or more ship free. There is no payment system or external service — it is a self-contained quote calculator.",
+    "capabilities": [
+      "View the checkout form in a browser to enter an order subtotal",
+      "Get a shipping quote by submitting the form, showing delivery charge and total",
+      "Query the quote API directly with GET /quote?subtotal=<amount> for JSON results",
+      "Receive a 400 error response for invalid, missing, zero, negative, or out-of-range subtotals",
+      "Receive a 404 response for any route other than GET / and GET /quote"
+    ],
+    "languages": [
+      {
+        "name": "JavaScript",
+        "role": "Implements the entire application: the HTTP server (app.mjs), the shipping-fee business logic (shipping.mjs), the unit test suite (tests/quote.test.mjs), and the interactive browser form script embedded in index.html"
+      },
+      {
+        "name": "HTML",
+        "role": "Defines the checkout UI served at GET / — the subtotal input form and output display area"
+      }
+    ],
+    "stack": [
+      "Node.js >=22 (ESM, built-in http, fs/promises, node:test, node:assert)",
+      "HTML5 + Fetch API (browser UI)"
+    ],
+    "runtime": "node22",
+    "install": [],
+    "build": [],
+    "checks": [
+      {
+        "label": "Run unit tests",
+        "argv": [
+          "node",
+          "--test",
+          "tests/*.test.mjs"
+        ],
+        "cwd": ".",
+        "requiresServer": false,
+        "timeoutSeconds": 600
+      }
+    ],
+    "start": {
+      "label": "Start HTTP server",
+      "argv": [
+        "node",
+        "app.mjs"
+      ],
+      "cwd": ".",
+      "requiresServer": false,
+      "timeoutSeconds": 10
+    },
+    "port": 3100,
+    "env": {
+      "PORT": "3100"
+    },
+    "services": [],
+    "limitations": [
+      "No CI configuration file (e.g. .github/workflows) was present in the snapshot, so the runtime choice (node22) is based solely on the engines field in package.json (>=22).",
+      "index.html has no separate source file for its inline script — it cannot be linted or tested in isolation without extracting it.",
+      "There are no lint, coverage, or integration test scripts defined in package.json beyond the basic node --test suite."
+    ],
+    "assumptions": [
+      "The deliberate boundary defect noted in the README is in shipping.mjs: the condition `subtotal > 100` gives free shipping only above $100, but the spec requires free shipping at exactly $100 as well; the correct condition should be `subtotal >= 100`. The existing unit tests do not cover the exact-$100 boundary case, so this defect passes the current test suite.",
+      "No package installation step is needed because package.json declares no dependencies (only engines and scripts); npm/pnpm install would be a no-op.",
+      "The shell glob `tests/*.test.mjs` is expanded by the Node CLI on Linux and will resolve to tests/quote.test.mjs correctly in the container."
+    ]
+  },
+  "results": [
+    {
+      "id": "existing-0",
+      "title": "Run unit tests",
+      "category": "existing test suite",
+      "expected": "Command completes with exit code 0",
+      "outcome": "passed",
+      "contractHash": "8a52d0d692598ab150bb6ab288a480aa92e99f92a2e17b3a25701dad124f37a0",
+      "logs": "TAP version 13\n# Subtest: ordinary orders have a five dollar delivery charge\nok 1 - ordinary orders have a five dollar delivery charge\n  ---\n  duration_ms: 1.7721\n  type: 'test'\n  ...\n# Subtest: large orders ship free\nok 2 - large orders ship free\n  ---\n  duration_ms: 0.2764\n  type: 'test'\n  ...\n# Subtest: invalid amounts are rejected\nok 3 - invalid amounts are rejected\n  ---\n  duration_ms: 0.1984\n  type: 'test'\n  ...\n1..3\n# tests 3\n# suites 0\n# pass 3\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 89.301\n\n",
+      "trace": [
+        {
+          "label": "Run unit tests",
+          "request": {
+            "argv": [
+              "node",
+              "--test",
+              "tests/*.test.mjs"
+            ]
+          },
+          "response": {
+            "exitCode": 0
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "http-1",
+      "title": "Normal quote below $100",
+      "intent": "Verify a standard paid-shipping order returns correct subtotal, shipping, and total",
+      "expected": "{subtotal:50,shipping:5,total:55} with status 200",
+      "basis": "documented",
+      "category": "normal",
+      "outcome": "passed",
+      "trace": [
+        {
+          "label": "GET /quote?subtotal=50",
+          "request": {
+            "method": "GET",
+            "path": "/quote?subtotal=50",
+            "headers": {},
+            "body": null
+          },
+          "response": {
+            "status": 200,
+            "headers": {
+              "connection": "keep-alive",
+              "content-type": "application/json",
+              "date": "Sun, 27 Sep 2026 12:54:37 GMT",
+              "keep-alive": "timeout=5",
+              "transfer-encoding": "chunked"
+            },
+            "body": "{\"subtotal\":50,\"shipping\":5,\"total\":55}",
+            "truncated": false
+          },
+          "assertions": [
+            {
+              "kind": "status",
+              "equals": 200,
+              "actual": 200,
+              "passed": true
+            },
+            {
+              "kind": "json",
+              "path": "subtotal",
+              "equals": 50,
+              "actual": 50,
+              "passed": true
+            },
+            {
+              "kind": "json",
+              "path": "shipping",
+              "equals": 5,
+              "actual": 5,
+              "passed": true
+            },
+            {
+              "kind": "json",
+              "path": "total",
+              "equals": 55,
+              "actual": 55,
+              "passed": true
+            }
+          ],
+          "error": null
+        },
+        {
+          "label": "GET /quote?subtotal=0.01 (minimum valid)",
+          "request": {
+            "method": "GET",
+            "path": "/quote?subtotal=0.01",
+            "headers": {},
+            "body": null
+          },
+          "response": {
+            "status": 200,
+            "headers": {
+              "connection": "keep-alive",
+              "content-type": "application/json",
+              "date": "Sun, 27 Sep 2026 12:54:37 GMT",
+              "keep-alive": "timeout=5",
+              "transfer-encoding": "chunked"
+            },
+            "body": "{\"subtotal\":0.01,\"shipping\":5,\"total\":5.01}",
+            "truncated": false
+          },
+          "assertions": [
+            {
+              "kind": "status",
+              "equals": 200,
+              "actual": 200,
+              "passed": true
+            },
+            {
+              "kind": "json",
+              "path": "subtotal",
+              "equals": 0.01,
+              "actual": 0.01,
+              "passed": true
+            },
+            {
+              "kind": "json",
+              "path": "shipping",
+              "equals": 5,
+              "actual": 5,
+              "passed": true
+            },
+            {
+              "kind": "json",
+              "path": "total",
+              "equals": 5.01,
+              "actual": 5.01,
+              "passed": true
+            }
+          ],
+          "error": null
+        },
+        {
+          "label": "GET /quote?subtotal=99.99 (just below free-shipping boundary)",
+          "request": {
+            "method": "GET",
+            "path": "/quote?subtotal=99.99",
+            "headers": {},
+            "body": null
+          },
+          "response": {
+            "status": 200,
+            "headers": {
+              "connection": "keep-alive",
+              "content-type": "application/json",
+              "date": "Sun, 27 Sep 2026 12:54:37 GMT",
+              "keep-alive": "timeout=5",
+              "transfer-encoding": "chunked"
+            },
+            "body": "{\"subtotal\":99.99,\"shipping\":5,\"total\":104.99}",
+            "truncated": false
+          },
+          "assertions": [
+            {
+              "kind": "status",
+              "equals": 200,
+              "actual": 200,
+              "passed": true
+            },
+            {
+              "kind": "json",
+              "path": "shipping",
+              "equals": 5,
+              "actual": 5,
+              "passed": true
+            },
+            {
+              "kind": "json",
+              "path": "total",
+              "equals": 104.99,
+              "actual": 104.99,
+              "passed": true
+            }
+          ],
+          "error": null
+        },
+        {
+          "label": "GET /quote?subtotal=10000 (maximum valid)",
+          "request": {
+            "method": "GET",
+            "path": "/quote?subtotal=10000",
+            "headers": {},
+            "body": null
+          },
+          "response": {
+            "status": 200,
+            "headers": {
+              "connection": "keep-alive",
+              "content-type": "application/json",
+              "date": "Sun, 27 Sep 2026 12:54:37 GMT",
+              "keep-alive": "timeout=5",
+              "transfer-encoding": "chunked"
+            },
+            "body": "{\"subtotal\":10000,\"shipping\":0,\"total\":10000}",
+            "truncated": false
+          },
+          "assertions": [
+            {
+              "kind": "status",
+              "equals": 200,
+              "actual": 200,
+              "passed": true
+            },
+            {
+              "kind": "json",
+              "path": "shipping",
+              "equals": 0,
+              "actual": 0,
+              "passed": true
+            },
+            {
+              "kind": "json",
+              "path": "total",
+              "equals": 10000,
+              "actual": 10000,
+              "passed": true
+            }
+          ],
+          "error": null
+        }
+      ],
+      "failedAssertions": 0,
+      "incomplete": 0,
+      "durationMs": 94,
+      "logs": "[stdout] Shipping service ready\n",
+      "contractHash": "5dee0c0e48f9f4e0871f4bf944860d63a640be4a4f9dcc0602072941f15679e6"
+    },
+    {
+      "id": "http-2",
+      "title": "Free-shipping boundary at exactly $100",
+      "intent": "Expose the deliberate defect: subtotal=100 should yield shipping=0 but the > condition charges $5",
+      "expected": "Status 200 with shipping:0 and total:100 (current code fails this — shipping.mjs uses > instead of >=)",
+      "basis": "assumption",
+      "category": "boundary",
+      "outcome": "failed",
+      "trace": [
+        {
+          "label": "GET /quote?subtotal=100 (boundary — free shipping spec)",
+          "request": {
+            "method": "GET",
+            "path": "/quote?subtotal=100",
+            "headers": {},
+            "body": null
+          },
+          "response": {
+            "status": 200,
+            "headers": {
+              "connection": "keep-alive",
+              "content-type": "application/json",
+              "date": "Sun, 27 Sep 2026 12:54:37 GMT",
+              "keep-alive": "timeout=5",
+              "transfer-encoding": "chunked"
+            },
+            "body": "{\"subtotal\":100,\"shipping\":5,\"total\":105}",
+            "truncated": false
+          },
+          "assertions": [
+            {
+              "kind": "status",
+              "equals": 200,
+              "actual": 200,
+              "passed": true
+            },
+            {
+              "kind": "json",
+              "path": "subtotal",
+              "equals": 100,
+              "actual": 100,
+              "passed": true
+            },
+            {
+              "kind": "json",
+              "path": "shipping",
+              "equals": 0,
+              "actual": 5,
+              "passed": false
+            },
+            {
+              "kind": "json",
+              "path": "total",
+              "equals": 100,
+              "actual": 105,
+              "passed": false
+            }
+          ],
+          "error": null
+        },
+        {
+          "label": "GET /quote?subtotal=100.01 (just above boundary — confirmed free shipping)",
+          "request": {
+            "method": "GET",
+            "path": "/quote?subtotal=100.01",
+            "headers": {},
+            "body": null
+          },
+          "response": {
+            "status": 200,
+            "headers": {
+              "connection": "keep-alive",
+              "content-type": "application/json",
+              "date": "Sun, 27 Sep 2026 12:54:37 GMT",
+              "keep-alive": "timeout=5",
+              "transfer-encoding": "chunked"
+            },
+            "body": "{\"subtotal\":100.01,\"shipping\":0,\"total\":100.01}",
+            "truncated": false
+          },
+          "assertions": [
+            {
+              "kind": "status",
+              "equals": 200,
+              "actual": 200,
+              "passed": true
+            },
+            {
+              "kind": "json",
+              "path": "shipping",
+              "equals": 0,
+              "actual": 0,
+              "passed": true
+            },
+            {
+              "kind": "json",
+              "path": "total",
+              "equals": 100.01,
+              "actual": 100.01,
+              "passed": true
+            }
+          ],
+          "error": null
+        }
+      ],
+      "failedAssertions": 2,
+      "incomplete": 0,
+      "durationMs": 88,
+      "logs": "[stdout] Shipping service ready\n",
+      "contractHash": "73e516c1ba9a925f2bd8059266f647d87c9c19a560719bdababa31114b2da604"
+    },
+    {
+      "id": "http-4",
+      "title": "Unknown routes return 404",
+      "intent": "Confirm the server responds 404 with an error body for any unregistered path",
+      "expected": "Status 404 and JSON error body for unrecognised paths; POST /quote also 404",
+      "basis": "documented",
+      "category": "adversarial",
+      "outcome": "passed",
+      "trace": [
+        {
+          "label": "GET /unknown",
+          "request": {
+            "method": "GET",
+            "path": "/unknown",
+            "headers": {},
+            "body": null
+          },
+          "response": {
+            "status": 404,
+            "headers": {
+              "connection": "keep-alive",
+              "content-type": "application/json",
+              "date": "Sun, 27 Sep 2026 12:54:41 GMT",
+              "keep-alive": "timeout=5",
+              "transfer-encoding": "chunked"
+            },
+            "body": "{\"error\":\"Route not found\"}",
+            "truncated": false
+          },
+          "assertions": [
+            {
+              "kind": "status",
+              "equals": 404,
+              "actual": 404,
+              "passed": true
+            },
+            {
+              "kind": "json",
+              "path": "error",
+              "equals": "Route not found",
+              "actual": "Route not found",
+              "passed": true
+            }
+          ],
+          "error": null
+        },
+        {
+          "label": "GET /Quote (case-sensitive)",
+          "request": {
+            "method": "GET",
+            "path": "/Quote",
+            "headers": {},
+            "body": null
+          },
+          "response": {
+            "status": 404,
+            "headers": {
+              "connection": "keep-alive",
+              "content-type": "application/json",
+              "date": "Sun, 27 Sep 2026 12:54:41 GMT",
+              "keep-alive": "timeout=5",
+              "transfer-encoding": "chunked"
+            },
+            "body": "{\"error\":\"Route not found\"}",
+            "truncated": false
+          },
+          "assertions": [
+            {
+              "kind": "status",
+              "equals": 404,
+              "actual": 404,
+              "passed": true
+            }
+          ],
+          "error": null
+        },
+        {
+          "label": "POST /quote (method not allowed — treated as 404 by router)",
+          "request": {
+            "method": "POST",
+            "path": "/quote",
+            "headers": {
+              "content-type": "application/json"
+            },
+            "body": "null"
+          },
+          "response": {
+            "status": 404,
+            "headers": {
+              "connection": "keep-alive",
+              "content-type": "application/json",
+              "date": "Sun, 27 Sep 2026 12:54:41 GMT",
+              "keep-alive": "timeout=5",
+              "transfer-encoding": "chunked"
+            },
+            "body": "{\"error\":\"Route not found\"}",
+            "truncated": false
+          },
+          "assertions": [
+            {
+              "kind": "status",
+              "equals": 404,
+              "actual": 404,
+              "passed": true
+            }
+          ],
+          "error": null
+        },
+        {
+          "label": "GET /quote/ (trailing slash)",
+          "request": {
+            "method": "GET",
+            "path": "/quote/",
+            "headers": {},
+            "body": null
+          },
+          "response": {
+            "status": 404,
+            "headers": {
+              "connection": "keep-alive",
+              "content-type": "application/json",
+              "date": "Sun, 27 Sep 2026 12:54:41 GMT",
+              "keep-alive": "timeout=5",
+              "transfer-encoding": "chunked"
+            },
+            "body": "{\"error\":\"Route not found\"}",
+            "truncated": false
+          },
+          "assertions": [
+            {
+              "kind": "status",
+              "equals": 404,
+              "actual": 404,
+              "passed": true
+            }
+          ],
+          "error": null
+        }
+      ],
+      "failedAssertions": 0,
+      "incomplete": 0,
+      "durationMs": 80,
+      "logs": "[stdout] Shipping service ready\n",
+      "contractHash": "21c2b7f6ca2b1e057d3d0fa2f6173653ee650a951d122f8f01ee3b0f4cb086ec"
+    },
+    {
+      "id": "http-3",
+      "title": "Invalid and missing subtotal inputs return 400",
+      "intent": "Validate rejection of zero, negative, non-numeric, blank, missing, and over-limit values",
+      "expected": "Status 400 with an error field for every case",
+      "basis": "documented",
+      "category": "adversarial",
+      "outcome": "passed",
+      "trace": [
+        {
+          "label": "GET /quote?subtotal=0",
+          "request": {
+            "method": "GET",
+            "path": "/quote?subtotal=0",
+            "headers": {},
+            "body": null
+          },
+          "response": {
+            "status": 400,
+            "headers": {
+              "connection": "keep-alive",
+              "content-type": "application/json",
+              "date": "Sun, 27 Sep 2026 12:54:41 GMT",
+              "keep-alive": "timeout=5",
+              "transfer-encoding": "chunked"
+            },
+            "body": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+            "truncated": false
+          },
+          "assertions": [
+            {
+              "kind": "status",
+              "equals": 400,
+              "actual": 400,
+              "passed": true
+            },
+            {
+              "kind": "json",
+              "path": "error",
+              "equals": "Subtotal must be a number greater than 0 and at most 10000",
+              "actual": "Subtotal must be a number greater than 0 and at most 10000",
+              "passed": true
+            }
+          ],
+          "error": null
+        },
+        {
+          "label": "GET /quote?subtotal=-1",
+          "request": {
+            "method": "GET",
+            "path": "/quote?subtotal=-1",
+            "headers": {},
+            "body": null
+          },
+          "response": {
+            "status": 400,
+            "headers": {
+              "connection": "keep-alive",
+              "content-type": "application/json",
+              "date": "Sun, 27 Sep 2026 12:54:41 GMT",
+              "keep-alive": "timeout=5",
+              "transfer-encoding": "chunked"
+            },
+            "body": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+            "truncated": false
+          },
+          "assertions": [
+            {
+              "kind": "status",
+              "equals": 400,
+              "actual": 400,
+              "passed": true
+            },
+            {
+              "kind": "contains",
+              "value": "error",
+              "actual": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+              "passed": true
+            }
+          ],
+          "error": null
+        },
+        {
+          "label": "GET /quote?subtotal=10001 (over limit)",
+          "request": {
+            "method": "GET",
+            "path": "/quote?subtotal=10001",
+            "headers": {},
+            "body": null
+          },
+          "response": {
+            "status": 400,
+            "headers": {
+              "connection": "keep-alive",
+              "content-type": "application/json",
+              "date": "Sun, 27 Sep 2026 12:54:41 GMT",
+              "keep-alive": "timeout=5",
+              "transfer-encoding": "chunked"
+            },
+            "body": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+            "truncated": false
+          },
+          "assertions": [
+            {
+              "kind": "status",
+              "equals": 400,
+              "actual": 400,
+              "passed": true
+            },
+            {
+              "kind": "contains",
+              "value": "error",
+              "actual": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+              "passed": true
+            }
+          ],
+          "error": null
+        },
+        {
+          "label": "GET /quote?subtotal=abc (non-numeric)",
+          "request": {
+            "method": "GET",
+            "path": "/quote?subtotal=abc",
+            "headers": {},
+            "body": null
+          },
+          "response": {
+            "status": 400,
+            "headers": {
+              "connection": "keep-alive",
+              "content-type": "application/json",
+              "date": "Sun, 27 Sep 2026 12:54:41 GMT",
+              "keep-alive": "timeout=5",
+              "transfer-encoding": "chunked"
+            },
+            "body": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+            "truncated": false
+          },
+          "assertions": [
+            {
+              "kind": "status",
+              "equals": 400,
+              "actual": 400,
+              "passed": true
+            },
+            {
+              "kind": "contains",
+              "value": "error",
+              "actual": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+              "passed": true
+            }
+          ],
+          "error": null
+        },
+        {
+          "label": "GET /quote?subtotal= (blank)",
+          "request": {
+            "method": "GET",
+            "path": "/quote?subtotal=",
+            "headers": {},
+            "body": null
+          },
+          "response": {
+            "status": 400,
+            "headers": {
+              "connection": "keep-alive",
+              "content-type": "application/json",
+              "date": "Sun, 27 Sep 2026 12:54:41 GMT",
+              "keep-alive": "timeout=5",
+              "transfer-encoding": "chunked"
+            },
+            "body": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+            "truncated": false
+          },
+          "assertions": [
+            {
+              "kind": "status",
+              "equals": 400,
+              "actual": 400,
+              "passed": true
+            },
+            {
+              "kind": "contains",
+              "value": "error",
+              "actual": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+              "passed": true
+            }
+          ],
+          "error": null
+        },
+        {
+          "label": "GET /quote (missing param)",
+          "request": {
+            "method": "GET",
+            "path": "/quote",
+            "headers": {},
+            "body": null
+          },
+          "response": {
+            "status": 400,
+            "headers": {
+              "connection": "keep-alive",
+              "content-type": "application/json",
+              "date": "Sun, 27 Sep 2026 12:54:41 GMT",
+              "keep-alive": "timeout=5",
+              "transfer-encoding": "chunked"
+            },
+            "body": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+            "truncated": false
+          },
+          "assertions": [
+            {
+              "kind": "status",
+              "equals": 400,
+              "actual": 400,
+              "passed": true
+            },
+            {
+              "kind": "contains",
+              "value": "error",
+              "actual": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+              "passed": true
+            }
+          ],
+          "error": null
+        },
+        {
+          "label": "GET /quote?subtotal=Infinity",
+          "request": {
+            "method": "GET",
+            "path": "/quote?subtotal=Infinity",
+            "headers": {},
+            "body": null
+          },
+          "response": {
+            "status": 400,
+            "headers": {
+              "connection": "keep-alive",
+              "content-type": "application/json",
+              "date": "Sun, 27 Sep 2026 12:54:41 GMT",
+              "keep-alive": "timeout=5",
+              "transfer-encoding": "chunked"
+            },
+            "body": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+            "truncated": false
+          },
+          "assertions": [
+            {
+              "kind": "status",
+              "equals": 400,
+              "actual": 400,
+              "passed": true
+            },
+            {
+              "kind": "contains",
+              "value": "error",
+              "actual": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+              "passed": true
+            }
+          ],
+          "error": null
+        }
+      ],
+      "failedAssertions": 0,
+      "incomplete": 0,
+      "durationMs": 90,
+      "logs": "[stdout] Shipping service ready\n",
+      "contractHash": "b36c5e0cc049e37ea439818b9aead714dd2ddba4e7d4d3eeeafb0c09453d50d2"
+    },
+    {
+      "id": "http-5",
+      "title": "GET / serves the HTML checkout page",
+      "intent": "Confirm the homepage returns the HTML form with correct content-type",
+      "expected": "Status 200, content-type text/html, body contains the form",
+      "basis": "documented",
+      "category": "normal",
+      "outcome": "passed",
+      "trace": [
+        {
+          "label": "GET /",
+          "request": {
+            "method": "GET",
+            "path": "/",
+            "headers": {},
+            "body": null
+          },
+          "response": {
+            "status": 200,
+            "headers": {
+              "connection": "keep-alive",
+              "content-length": "1108",
+              "content-type": "text/html; charset=utf-8",
+              "date": "Sun, 27 Sep 2026 12:54:45 GMT",
+              "keep-alive": "timeout=5"
+            },
+            "body": "<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><title>Shipping quote</title><style>body{font:18px system-ui;color:#23372e;background:#f5f5ef;margin:80px auto;max-width:560px}main{background:white;padding:40px;border:1px solid #dde3db;border-radius:8px}input,button{font:inherit;padding:12px}button{background:#2e5747;color:white;border:0}label{display:block;margin:24px 0 8px}output{display:block;margin-top:24px}</style><main><small>CHECKOUT</small><h1>Know your total.</h1><p>Delivery is $5. Orders of $100 or more ship free.</p><form><label for=\"subtotal\">Order subtotal ($)</label><input id=\"subtotal\" name=\"subtotal\" type=\"number\" step=\"0.01\" value=\"100\" required><button>Get quote</button></form><output aria-live=\"polite\" id=\"quote\"></output></main><script>document.querySelector('form').onsubmit=async e=>{e.preventDefault();const r=await fetch('/quote?subtotal='+encodeURIComponent(document.querySelector('#subtotal').value));const q=await r.json();document.querySelector('#quote').textContent=q.error||('Delivery: $'+q.shipping.toFixed(2)+' · Total: $'+q.total.toFixed(2));};</script></html>",
+            "truncated": false
+          },
+          "assertions": [
+            {
+              "kind": "status",
+              "equals": 200,
+              "actual": 200,
+              "passed": true
+            },
+            {
+              "kind": "header",
+              "name": "content-type",
+              "equals": "text/html; charset=utf-8",
+              "actual": "text/html; charset=utf-8",
+              "passed": true
+            },
+            {
+              "kind": "contains",
+              "value": "<form>",
+              "actual": "<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><title>Shipping quote</title><style>body{font:18px system-ui;color:#23372e;background:#f5f5ef;margin:80px auto;max-width:560px}main{background:white;padding:40px;border:1px solid #dde3db;border-radius:8px}input,button{font:inherit;padding:12px}button{background:#2e5747;color:white;border:0}label{display:block;margin:24px 0 8px}output{display:block;margin-top:24px}</style><main><small>CHECKOUT</small><h1>Know your total.</h1><p>Delivery is $5. Orders of $100 or more ship free.</p><form><label for=\"subtotal\">Order subtotal ($)</label><input id=\"subtotal\" name=\"subtotal\" type=\"number\" step=\"0.01\" value=\"100\" required><button>Get quote</button></form><output aria-live=\"polite\" id=\"quote\"></output></main><script>document.querySelector('form').onsubmit=async e=>{e.preventDefault();const r=await fetch('/quote?subtotal='+encodeURIComponent(document.querySelector('#subtotal').value));const q=await r.json();document.querySelector('#quote').textContent=q.error||('Delivery: $'+q.shipping.toFixed(2)+' · Total: $'+q.total.toFixed(2));};</script></html>",
+              "passed": true
+            },
+            {
+              "kind": "contains",
+              "value": "subtotal",
+              "actual": "<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><title>Shipping quote</title><style>body{font:18px system-ui;color:#23372e;background:#f5f5ef;margin:80px auto;max-width:560px}main{background:white;padding:40px;border:1px solid #dde3db;border-radius:8px}input,button{font:inherit;padding:12px}button{background:#2e5747;color:white;border:0}label{display:block;margin:24px 0 8px}output{display:block;margin-top:24px}</style><main><small>CHECKOUT</small><h1>Know your total.</h1><p>Delivery is $5. Orders of $100 or more ship free.</p><form><label for=\"subtotal\">Order subtotal ($)</label><input id=\"subtotal\" name=\"subtotal\" type=\"number\" step=\"0.01\" value=\"100\" required><button>Get quote</button></form><output aria-live=\"polite\" id=\"quote\"></output></main><script>document.querySelector('form').onsubmit=async e=>{e.preventDefault();const r=await fetch('/quote?subtotal='+encodeURIComponent(document.querySelector('#subtotal').value));const q=await r.json();document.querySelector('#quote').textContent=q.error||('Delivery: $'+q.shipping.toFixed(2)+' · Total: $'+q.total.toFixed(2));};</script></html>",
+              "passed": true
+            }
+          ],
+          "error": null
+        }
+      ],
+      "failedAssertions": 0,
+      "incomplete": 0,
+      "durationMs": 158,
+      "logs": "[stdout] Shipping service ready\n",
+      "contractHash": "b3044b7617f736aa6a0f9f27f5fc259837a464b9267d6f7b9d8a5298686218b4"
+    },
+    {
+      "id": "http-6",
+      "title": "Content-type is application/json on API responses",
+      "intent": "Ensure the API sets the correct content-type header for both success and error responses",
+      "expected": "content-type: application/json on 200 and 400 responses",
+      "basis": "documented",
+      "category": "normal",
+      "outcome": "passed",
+      "trace": [
+        {
+          "label": "Successful quote content-type",
+          "request": {
+            "method": "GET",
+            "path": "/quote?subtotal=50",
+            "headers": {},
+            "body": null
+          },
+          "response": {
+            "status": 200,
+            "headers": {
+              "connection": "keep-alive",
+              "content-type": "application/json",
+              "date": "Sun, 27 Sep 2026 12:54:45 GMT",
+              "keep-alive": "timeout=5",
+              "transfer-encoding": "chunked"
+            },
+            "body": "{\"subtotal\":50,\"shipping\":5,\"total\":55}",
+            "truncated": false
+          },
+          "assertions": [
+            {
+              "kind": "status",
+              "equals": 200,
+              "actual": 200,
+              "passed": true
+            },
+            {
+              "kind": "header",
+              "name": "content-type",
+              "equals": "application/json",
+              "actual": "application/json",
+              "passed": true
+            }
+          ],
+          "error": null
+        },
+        {
+          "label": "Error response content-type",
+          "request": {
+            "method": "GET",
+            "path": "/quote?subtotal=0",
+            "headers": {},
+            "body": null
+          },
+          "response": {
+            "status": 400,
+            "headers": {
+              "connection": "keep-alive",
+              "content-type": "application/json",
+              "date": "Sun, 27 Sep 2026 12:54:45 GMT",
+              "keep-alive": "timeout=5",
+              "transfer-encoding": "chunked"
+            },
+            "body": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+            "truncated": false
+          },
+          "assertions": [
+            {
+              "kind": "status",
+              "equals": 400,
+              "actual": 400,
+              "passed": true
+            },
+            {
+              "kind": "header",
+              "name": "content-type",
+              "equals": "application/json",
+              "actual": "application/json",
+              "passed": true
+            }
+          ],
+          "error": null
+        }
+      ],
+      "failedAssertions": 0,
+      "incomplete": 0,
+      "durationMs": 152,
+      "logs": "[stdout] Shipping service ready\n",
+      "contractHash": "6fd73083be10e45c3da392938d3994a5b4135d55b1b89e20a787882059dfe361"
+    },
+    {
+      "id": "adversarial-0",
+      "title": "Malformed and unexpected inputs: POST /quote",
+      "intent": "Exercise malformed JSON, null, arrays, missing values, unexpected types and numeric boundaries. Detect unhandled HTTP 5xx responses.",
+      "expected": "Bad inputs are handled without an unhandled server error. Exact domain rejection status is not assumed.",
+      "basis": "assumption",
+      "category": "input-validation",
+      "outcome": "passed",
+      "trace": [
+        {
+          "label": "Malformed JSON",
+          "request": {
+            "method": "POST",
+            "path": "/quote",
+            "headers": {
+              "content-type": "application/json"
+            },
+            "body": "{\"broken\":"
+          },
+          "response": {
+            "status": 404,
+            "headers": {
+              "connection": "keep-alive",
+              "content-type": "application/json",
+              "date": "Sun, 27 Sep 2026 12:54:49 GMT",
+              "keep-alive": "timeout=5",
+              "transfer-encoding": "chunked"
+            },
+            "body": "{\"error\":\"Route not found\"}",
+            "truncated": false
+          },
+          "assertions": [
+            {
+              "kind": "not5xx",
+              "actual": 404,
+              "passed": true
+            }
+          ],
+          "error": null
+        },
+        {
+          "label": "Unexpected input 0",
+          "request": {
+            "method": "POST",
+            "path": "/quote",
+            "headers": {
+              "content-type": "application/json"
+            },
+            "body": "null"
+          },
+          "response": {
+            "status": 404,
+            "headers": {
+              "connection": "keep-alive",
+              "content-type": "application/json",
+              "date": "Sun, 27 Sep 2026 12:54:49 GMT",
+              "keep-alive": "timeout=5",
+              "transfer-encoding": "chunked"
+            },
+            "body": "{\"error\":\"Route not found\"}",
+            "truncated": false
+          },
+          "assertions": [
+            {
+              "kind": "not5xx",
+              "actual": 404,
+              "passed": true
+            }
+          ],
+          "error": null
+        },
+        {
+          "label": "Unexpected input 1",
+          "request": {
+            "method": "POST",
+            "path": "/quote",
+            "headers": {
+              "content-type": "application/json"
+            },
+            "body": "[]"
+          },
+          "response": {
+            "status": 404,
+            "headers": {
+              "connection": "keep-alive",
+              "content-type": "application/json",
+              "date": "Sun, 27 Sep 2026 12:54:49 GMT",
+              "keep-alive": "timeout=5",
+              "transfer-encoding": "chunked"
+            },
+            "body": "{\"error\":\"Route not found\"}",
+            "truncated": false
+          },
+          "assertions": [
+            {
+              "kind": "not5xx",
+              "actual": 404,
+              "passed": true
+            }
+          ],
+          "error": null
+        },
+        {
+          "label": "Unexpected input 2",
+          "request": {
+            "method": "POST",
+            "path": "/quote",
+            "headers": {
+              "content-type": "application/json"
+            },
+            "body": "{}"
+          },
+          "response": {
+            "status": 404,
+            "headers": {
+              "connection": "keep-alive",
+              "content-type": "application/json",
+              "date": "Sun, 27 Sep 2026 12:54:49 GMT",
+              "keep-alive": "timeout=5",
+              "transfer-encoding": "chunked"
+            },
+            "body": "{\"error\":\"Route not found\"}",
+            "truncated": false
+          },
+          "assertions": [
+            {
+              "kind": "not5xx",
+              "actual": 404,
+              "passed": true
+            }
+          ],
+          "error": null
+        },
+        {
+          "label": "Unexpected input 3",
+          "request": {
+            "method": "POST",
+            "path": "/quote",
+            "headers": {
+              "content-type": "application/json"
+            },
+            "body": "\"unexpected\""
+          },
+          "response": {
+            "status": 404,
+            "headers": {
+              "connection": "keep-alive",
+              "content-type": "application/json",
+              "date": "Sun, 27 Sep 2026 12:54:49 GMT",
+              "keep-alive": "timeout=5",
+              "transfer-encoding": "chunked"
+            },
+            "body": "{\"error\":\"Route not found\"}",
+            "truncated": false
+          },
+          "assertions": [
+            {
+              "kind": "not5xx",
+              "actual": 404,
+              "passed": true
+            }
+          ],
+          "error": null
+        },
+        {
+          "label": "Unexpected input 4",
+          "request": {
+            "method": "POST",
+            "path": "/quote",
+            "headers": {
+              "content-type": "application/json"
+            },
+            "body": "{}"
+          },
+          "response": {
+            "status": 404,
+            "headers": {
+              "connection": "keep-alive",
+              "content-type": "application/json",
+              "date": "Sun, 27 Sep 2026 12:54:49 GMT",
+              "keep-alive": "timeout=5",
+              "transfer-encoding": "chunked"
+            },
+            "body": "{\"error\":\"Route not found\"}",
+            "truncated": false
+          },
+          "assertions": [
+            {
+              "kind": "not5xx",
+              "actual": 404,
+              "passed": true
+            }
+          ],
+          "error": null
+        }
+      ],
+      "failedAssertions": 0,
+      "incomplete": 0,
+      "durationMs": 114,
+      "logs": "[stdout] Shipping service ready\n",
+      "contractHash": "006c3b0e2378c8a795662ca896ebaab9271ee50a5e6e3097088188255f73f716"
+    },
+    {
+      "id": "browser-1",
+      "title": "Happy-path quote submission",
+      "intent": "User enters a valid subtotal, submits the form, and sees the delivery charge and total",
+      "expected": "Output element shows Delivery and Total values matching the API response",
+      "basis": "documented",
+      "category": "frontend",
+      "outcome": "passed",
+      "trace": [
+        {
+          "action": {
+            "action": "goto",
+            "path": "/"
+          },
+          "error": null
+        },
+        {
+          "action": {
+            "action": "visible",
+            "selector": "form"
+          },
+          "error": null
+        },
+        {
+          "action": {
+            "action": "fill",
+            "selector": "#subtotal",
+            "value": "50"
+          },
+          "error": null
+        },
+        {
+          "action": {
+            "action": "click",
+            "selector": "button"
+          },
+          "error": null
+        },
+        {
+          "action": {
+            "action": "text",
+            "selector": "#quote",
+            "value": "Delivery: $5.00"
+          },
+          "error": null
+        },
+        {
+          "action": {
+            "action": "text",
+            "selector": "#quote",
+            "value": "Total: $55.00"
+          },
+          "error": null
+        }
+      ],
+      "errors": [],
+      "observations": [],
+      "requests": [],
+      "network": [
+        {
+          "action": {
+            "action": "goto",
+            "path": "/"
+          },
+          "url": "http://127.0.0.1:3100/",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "action": {
+            "action": "text",
+            "selector": "#quote",
+            "value": "Delivery: $5.00"
+          },
+          "url": "http://127.0.0.1:3100/quote?subtotal=50",
+          "method": "GET",
+          "status": 200
+        }
+      ],
+      "durationMs": 387,
+      "screenshot": "proofrun-0106a569-250-browser-1-final.png",
+      "limitations": [],
+      "logs": "[stdout] Shipping service ready\n",
+      "contractHash": "84a6359d76e397493634859908720ac6b61113344f9e80fed021a42c88a0ac6b"
+    },
+    {
+      "id": "browser-2",
+      "title": "Free-shipping boundary quote in browser",
+      "intent": "Submit subtotal=150 and verify the form displays zero shipping cost",
+      "expected": "Output shows Delivery: $0.00 and Total: $150.00",
+      "basis": "documented",
+      "category": "frontend",
+      "outcome": "passed",
+      "trace": [
+        {
+          "action": {
+            "action": "goto",
+            "path": "/"
+          },
+          "error": null
+        },
+        {
+          "action": {
+            "action": "fill",
+            "selector": "#subtotal",
+            "value": "150"
+          },
+          "error": null
+        },
+        {
+          "action": {
+            "action": "click",
+            "selector": "button"
+          },
+          "error": null
+        },
+        {
+          "action": {
+            "action": "text",
+            "selector": "#quote",
+            "value": "Delivery: $0.00"
+          },
+          "error": null
+        },
+        {
+          "action": {
+            "action": "text",
+            "selector": "#quote",
+            "value": "Total: $150.00"
+          },
+          "error": null
+        }
+      ],
+      "errors": [],
+      "observations": [],
+      "requests": [],
+      "network": [
+        {
+          "action": {
+            "action": "goto",
+            "path": "/"
+          },
+          "url": "http://127.0.0.1:3100/",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "action": {
+            "action": "text",
+            "selector": "#quote",
+            "value": "Delivery: $0.00"
+          },
+          "url": "http://127.0.0.1:3100/quote?subtotal=150",
+          "method": "GET",
+          "status": 200
+        }
+      ],
+      "durationMs": 379,
+      "screenshot": "proofrun-e06cbcc2-7ce-browser-2-final.png",
+      "limitations": [],
+      "logs": "[stdout] Shipping service ready\n",
+      "contractHash": "592d6ec307d13b619a3cb1982fe60261944dde03a44244293117245c346694c4"
+    },
+    {
+      "id": "browser-3",
+      "title": "Missing subtotal triggers native browser validation",
+      "intent": "Clear the required number input and attempt submission; native validation must block the request",
+      "expected": "#subtotal is in an invalid state and no network request is made",
+      "basis": "documented",
+      "category": "frontend",
+      "outcome": "passed",
+      "trace": [
+        {
+          "action": {
+            "action": "goto",
+            "path": "/"
+          },
+          "error": null
+        },
+        {
+          "action": {
+            "action": "fill",
+            "selector": "#subtotal",
+            "value": ""
+          },
+          "error": null
+        },
+        {
+          "action": {
+            "action": "click",
+            "selector": "button"
+          },
+          "error": null
+        },
+        {
+          "action": {
+            "action": "invalid",
+            "selector": "#subtotal"
+          },
+          "error": null,
+          "validation": {
+            "valid": false,
+            "willValidate": true,
+            "message": "Please fill out this field.",
+            "value": ""
+          }
+        }
+      ],
+      "errors": [],
+      "observations": [],
+      "requests": [],
+      "network": [
+        {
+          "action": {
+            "action": "goto",
+            "path": "/"
+          },
+          "url": "http://127.0.0.1:3100/",
+          "method": "GET",
+          "status": 200
+        }
+      ],
+      "durationMs": 223,
+      "screenshot": "proofrun-508e238a-8a8-browser-3-final.png",
+      "limitations": [],
+      "logs": "[stdout] Shipping service ready\n",
+      "contractHash": "ac4c14a5ea48f5a8aa54e54eb72b78a0c2408e4daa7c4f195b562869f486ea5b"
+    }
+  ],
+  "issues": [
+    {
+      "id": "b1531145-dc3d-4afa-8f78-98f12fd56e2a",
+      "testId": "http-2",
+      "severity": "medium",
+      "category": "boundary",
+      "title": "Free-shipping boundary at exactly $100",
+      "description": "When subtotal is exactly 100, the shipping charge is incorrectly calculated as $5 instead of $0. The specification states that orders of $100 or more receive free shipping, including exactly $100. The implementation uses a strict greater-than operator (`>`) instead of greater-than-or-equal (`>=`), causing the boundary value to fall through to the $5 charge.",
+      "reproduction": [
+        {
+          "step": 1,
+          "action": "GET /quote?subtotal=100 (boundary — free shipping spec)",
+          "request": {
+            "method": "GET",
+            "path": "/quote?subtotal=100",
+            "headers": {},
+            "body": null
+          },
+          "response": {
+            "status": 200,
+            "headers": {
+              "connection": "keep-alive",
+              "content-type": "application/json",
+              "date": "Sun, 27 Sep 2026 12:54:37 GMT",
+              "keep-alive": "timeout=5",
+              "transfer-encoding": "chunked"
+            },
+            "body": "{\"subtotal\":100,\"shipping\":5,\"total\":105}",
+            "truncated": false
+          },
+          "error": null
+        },
+        {
+          "step": 2,
+          "action": "GET /quote?subtotal=100.01 (just above boundary — confirmed free shipping)",
+          "request": {
+            "method": "GET",
+            "path": "/quote?subtotal=100.01",
+            "headers": {},
+            "body": null
+          },
+          "response": {
+            "status": 200,
+            "headers": {
+              "connection": "keep-alive",
+              "content-type": "application/json",
+              "date": "Sun, 27 Sep 2026 12:54:37 GMT",
+              "keep-alive": "timeout=5",
+              "transfer-encoding": "chunked"
+            },
+            "body": "{\"subtotal\":100.01,\"shipping\":0,\"total\":100.01}",
+            "truncated": false
+          },
+          "error": null
+        }
+      ],
+      "triggeringInput": [
+        {
+          "method": "GET",
+          "path": "/quote?subtotal=100",
+          "headers": {},
+          "body": null
+        }
+      ],
+      "executionContext": {
+        "runtime": "node22",
+        "sourceSnapshot": "269737dee57799e289d0949ea1c700c8ecd8868b5de4aeba4996be6c77bbb285",
+        "contractHash": "73e516c1ba9a925f2bd8059266f647d87c9c19a560719bdababa31114b2da604"
+      },
+      "logs": "[stdout] Shipping service ready\n",
+      "stackTrace": "",
+      "expected": "Status 200 with shipping:0 and total:100 (current code fails this — shipping.mjs uses > instead of >=)",
+      "actual": [
+        {
+          "label": "GET /quote?subtotal=100 (boundary — free shipping spec)",
+          "request": {
+            "method": "GET",
+            "path": "/quote?subtotal=100",
+            "headers": {},
+            "body": null
+          },
+          "response": {
+            "status": 200,
+            "headers": {
+              "connection": "keep-alive",
+              "content-type": "application/json",
+              "date": "Sun, 27 Sep 2026 12:54:37 GMT",
+              "keep-alive": "timeout=5",
+              "transfer-encoding": "chunked"
+            },
+            "body": "{\"subtotal\":100,\"shipping\":5,\"total\":105}",
+            "truncated": false
+          },
+          "assertions": [
+            {
+              "kind": "status",
+              "equals": 200,
+              "actual": 200,
+              "passed": true
+            },
+            {
+              "kind": "json",
+              "path": "subtotal",
+              "equals": 100,
+              "actual": 100,
+              "passed": true
+            },
+            {
+              "kind": "json",
+              "path": "shipping",
+              "equals": 0,
+              "actual": 5,
+              "passed": false
+            },
+            {
+              "kind": "json",
+              "path": "total",
+              "equals": 100,
+              "actual": 105,
+              "passed": false
+            }
+          ],
+          "error": null
+        }
+      ],
+      "rootCause": "In `shipping.mjs` line 5, the condition `subtotal > 100` excludes the boundary value 100 from free shipping. The correct condition per the README spec ('Orders of $100 or more receive free shipping, including exactly $100') is `subtotal >= 100`.",
+      "affected": [
+        {
+          "path": "shipping.mjs",
+          "line": 5,
+          "symbol": "quote"
+        }
+      ],
+      "recommendedFix": "Change `subtotal > 100` to `subtotal >= 100` on line 5 of `shipping.mjs`.",
+      "fixExplanation": "The single-character change from `>` to `>=` aligns the boundary condition with the documented specification. With `>=`, any subtotal of exactly 100 will produce `shipping: 0` and `total: 100`, matching the expected response. Values above 100 already produce free shipping and are unaffected. Values below 100 continue to produce `shipping: 5`. The existing test suite does not cover the boundary value 100 directly (tests only use 50 and 150), so the defect was not caught by the current tests. A boundary test at subtotal=100 should be added, but per schema rules the test files must not be edited here; that addition is left as a recommendation.",
+      "risks": "The change is narrowly scoped to one operator in one expression. No other logic paths in `shipping.mjs` or `app.mjs` are touched. The existing passing tests (subtotal=50 → shipping=5; subtotal=150 → shipping=0) remain valid and unaffected. The only observable behavioral change is that subtotal=100 now returns shipping=0 instead of shipping=5. No test in the current suite asserts the old (incorrect) behavior for subtotal=100, so no tests will break. Risk is low.",
+      "basis": "assumption",
+      "status": "resolved",
+      "validation": {
+        "resolved": true,
+        "time": "2026-09-27T12:55:50.506Z",
+        "contractsUnchanged": true
+      }
+    }
+  ],
+  "fixes": [
+    {
+      "id": "9f480802-3a86-453c-96c7-67966b58eb19",
+      "issueId": "b1531145-dc3d-4afa-8f78-98f12fd56e2a",
+      "revision": 1,
+      "snapshot": "269737dee57799e289d0949ea1c700c8ecd8868b5de4aeba4996be6c77bbb285",
+      "status": "applied",
+      "explanation": "Replace the strict `>` with `>=` in the shipping-tier condition inside `quote()` in `shipping.mjs`. Every other character, line, and CRLF ending is preserved to match the original file exactly.",
+      "risks": "Minimal. Only the boundary value 100 changes behavior. All other inputs behave identically to before. No dependency, config, or test file is modified.",
+      "files": [
+        {
+          "path": "shipping.mjs",
+          "beforeHash": "694629456b3bb874a00a27d9041638773749367172ee907a642f9d980a2a7756",
+          "before": "export function quote(subtotal) {\r\n  if (typeof subtotal !== \"number\" || !Number.isFinite(subtotal) || subtotal <= 0 || subtotal > 10000) {\r\n    return { error: \"Subtotal must be a number greater than 0 and at most 10000\" };\r\n  }\r\n  const shipping = subtotal > 100 ? 0 : 5;\r\n  return { subtotal, shipping, total: Math.round((subtotal + shipping) * 100) / 100 };\r\n}\r\n",
+          "after": "export function quote(subtotal) {\r\n  if (typeof subtotal !== \"number\" || !Number.isFinite(subtotal) || subtotal <= 0 || subtotal > 10000) {\r\n    return { error: \"Subtotal must be a number greater than 0 and at most 10000\" };\r\n  }\r\n  const shipping = subtotal >= 100 ? 0 : 5;\r\n  return { subtotal, shipping, total: Math.round((subtotal + shipping) * 100) / 100 };\r\n}\r\n",
+          "diff": "--- a/shipping.mjs\n+++ b/shipping.mjs\n@@ -2,7 +2,7 @@\n   if (typeof subtotal !== \"number\" || !Number.isFinite(subtotal) || subtotal <= 0 || subtotal > 10000) {\r\n     return { error: \"Subtotal must be a number greater than 0 and at most 10000\" };\r\n   }\r\n-  const shipping = subtotal > 100 ? 0 : 5;\r\n+  const shipping = subtotal >= 100 ? 0 : 5;\r\n   return { subtotal, shipping, total: Math.round((subtotal + shipping) * 100) / 100 };\r\n }\r\n "
+        }
+      ],
+      "approvedAt": "2026-09-27T12:55:19.238Z",
+      "retest": {
+        "time": "2026-09-27T12:55:50.506Z",
+        "sourceSnapshot": "86391d3db9dee0391b059bc8f0eda82f21d18f00f5815b4aa32aecf854af6fda",
+        "fixId": "9f480802-3a86-453c-96c7-67966b58eb19",
+        "fixIds": [
+          "9f480802-3a86-453c-96c7-67966b58eb19"
+        ],
+        "contractsUnchanged": true,
+        "results": [
+          {
+            "id": "existing-0",
+            "title": "Run unit tests",
+            "category": "existing test suite",
+            "expected": "Command completes with exit code 0",
+            "outcome": "passed",
+            "contractHash": "8a52d0d692598ab150bb6ab288a480aa92e99f92a2e17b3a25701dad124f37a0",
+            "logs": "TAP version 13\n# Subtest: ordinary orders have a five dollar delivery charge\nok 1 - ordinary orders have a five dollar delivery charge\n  ---\n  duration_ms: 1.427691\n  type: 'test'\n  ...\n# Subtest: large orders ship free\nok 2 - large orders ship free\n  ---\n  duration_ms: 0.236565\n  type: 'test'\n  ...\n# Subtest: invalid amounts are rejected\nok 3 - invalid amounts are rejected\n  ---\n  duration_ms: 0.263272\n  type: 'test'\n  ...\n1..3\n# tests 3\n# suites 0\n# pass 3\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 71.537669\n\n",
+            "trace": [
+              {
+                "label": "Run unit tests",
+                "request": {
+                  "argv": [
+                    "node",
+                    "--test",
+                    "tests/*.test.mjs"
+                  ]
+                },
+                "response": {
+                  "exitCode": 0
+                },
+                "error": null
+              }
+            ]
+          },
+          {
+            "id": "http-1",
+            "title": "Normal quote below $100",
+            "intent": "Verify a standard paid-shipping order returns correct subtotal, shipping, and total",
+            "expected": "{subtotal:50,shipping:5,total:55} with status 200",
+            "basis": "documented",
+            "category": "normal",
+            "outcome": "passed",
+            "trace": [
+              {
+                "label": "GET /quote?subtotal=50",
+                "request": {
+                  "method": "GET",
+                  "path": "/quote?subtotal=50",
+                  "headers": {},
+                  "body": null
+                },
+                "response": {
+                  "status": 200,
+                  "headers": {
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "date": "Sun, 27 Sep 2026 12:55:29 GMT",
+                    "keep-alive": "timeout=5",
+                    "transfer-encoding": "chunked"
+                  },
+                  "body": "{\"subtotal\":50,\"shipping\":5,\"total\":55}",
+                  "truncated": false
+                },
+                "assertions": [
+                  {
+                    "kind": "status",
+                    "equals": 200,
+                    "actual": 200,
+                    "passed": true
+                  },
+                  {
+                    "kind": "json",
+                    "path": "subtotal",
+                    "equals": 50,
+                    "actual": 50,
+                    "passed": true
+                  },
+                  {
+                    "kind": "json",
+                    "path": "shipping",
+                    "equals": 5,
+                    "actual": 5,
+                    "passed": true
+                  },
+                  {
+                    "kind": "json",
+                    "path": "total",
+                    "equals": 55,
+                    "actual": 55,
+                    "passed": true
+                  }
+                ],
+                "error": null
+              },
+              {
+                "label": "GET /quote?subtotal=0.01 (minimum valid)",
+                "request": {
+                  "method": "GET",
+                  "path": "/quote?subtotal=0.01",
+                  "headers": {},
+                  "body": null
+                },
+                "response": {
+                  "status": 200,
+                  "headers": {
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "date": "Sun, 27 Sep 2026 12:55:29 GMT",
+                    "keep-alive": "timeout=5",
+                    "transfer-encoding": "chunked"
+                  },
+                  "body": "{\"subtotal\":0.01,\"shipping\":5,\"total\":5.01}",
+                  "truncated": false
+                },
+                "assertions": [
+                  {
+                    "kind": "status",
+                    "equals": 200,
+                    "actual": 200,
+                    "passed": true
+                  },
+                  {
+                    "kind": "json",
+                    "path": "subtotal",
+                    "equals": 0.01,
+                    "actual": 0.01,
+                    "passed": true
+                  },
+                  {
+                    "kind": "json",
+                    "path": "shipping",
+                    "equals": 5,
+                    "actual": 5,
+                    "passed": true
+                  },
+                  {
+                    "kind": "json",
+                    "path": "total",
+                    "equals": 5.01,
+                    "actual": 5.01,
+                    "passed": true
+                  }
+                ],
+                "error": null
+              },
+              {
+                "label": "GET /quote?subtotal=99.99 (just below free-shipping boundary)",
+                "request": {
+                  "method": "GET",
+                  "path": "/quote?subtotal=99.99",
+                  "headers": {},
+                  "body": null
+                },
+                "response": {
+                  "status": 200,
+                  "headers": {
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "date": "Sun, 27 Sep 2026 12:55:29 GMT",
+                    "keep-alive": "timeout=5",
+                    "transfer-encoding": "chunked"
+                  },
+                  "body": "{\"subtotal\":99.99,\"shipping\":5,\"total\":104.99}",
+                  "truncated": false
+                },
+                "assertions": [
+                  {
+                    "kind": "status",
+                    "equals": 200,
+                    "actual": 200,
+                    "passed": true
+                  },
+                  {
+                    "kind": "json",
+                    "path": "shipping",
+                    "equals": 5,
+                    "actual": 5,
+                    "passed": true
+                  },
+                  {
+                    "kind": "json",
+                    "path": "total",
+                    "equals": 104.99,
+                    "actual": 104.99,
+                    "passed": true
+                  }
+                ],
+                "error": null
+              },
+              {
+                "label": "GET /quote?subtotal=10000 (maximum valid)",
+                "request": {
+                  "method": "GET",
+                  "path": "/quote?subtotal=10000",
+                  "headers": {},
+                  "body": null
+                },
+                "response": {
+                  "status": 200,
+                  "headers": {
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "date": "Sun, 27 Sep 2026 12:55:29 GMT",
+                    "keep-alive": "timeout=5",
+                    "transfer-encoding": "chunked"
+                  },
+                  "body": "{\"subtotal\":10000,\"shipping\":0,\"total\":10000}",
+                  "truncated": false
+                },
+                "assertions": [
+                  {
+                    "kind": "status",
+                    "equals": 200,
+                    "actual": 200,
+                    "passed": true
+                  },
+                  {
+                    "kind": "json",
+                    "path": "shipping",
+                    "equals": 0,
+                    "actual": 0,
+                    "passed": true
+                  },
+                  {
+                    "kind": "json",
+                    "path": "total",
+                    "equals": 10000,
+                    "actual": 10000,
+                    "passed": true
+                  }
+                ],
+                "error": null
+              }
+            ],
+            "failedAssertions": 0,
+            "incomplete": 0,
+            "durationMs": 145,
+            "logs": "[stdout] Shipping service ready\n",
+            "contractHash": "5dee0c0e48f9f4e0871f4bf944860d63a640be4a4f9dcc0602072941f15679e6"
+          },
+          {
+            "id": "http-2",
+            "title": "Free-shipping boundary at exactly $100",
+            "intent": "Expose the deliberate defect: subtotal=100 should yield shipping=0 but the > condition charges $5",
+            "expected": "Status 200 with shipping:0 and total:100 (current code fails this — shipping.mjs uses > instead of >=)",
+            "basis": "assumption",
+            "category": "boundary",
+            "outcome": "passed",
+            "trace": [
+              {
+                "label": "GET /quote?subtotal=100 (boundary — free shipping spec)",
+                "request": {
+                  "method": "GET",
+                  "path": "/quote?subtotal=100",
+                  "headers": {},
+                  "body": null
+                },
+                "response": {
+                  "status": 200,
+                  "headers": {
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "date": "Sun, 27 Sep 2026 12:55:29 GMT",
+                    "keep-alive": "timeout=5",
+                    "transfer-encoding": "chunked"
+                  },
+                  "body": "{\"subtotal\":100,\"shipping\":0,\"total\":100}",
+                  "truncated": false
+                },
+                "assertions": [
+                  {
+                    "kind": "status",
+                    "equals": 200,
+                    "actual": 200,
+                    "passed": true
+                  },
+                  {
+                    "kind": "json",
+                    "path": "subtotal",
+                    "equals": 100,
+                    "actual": 100,
+                    "passed": true
+                  },
+                  {
+                    "kind": "json",
+                    "path": "shipping",
+                    "equals": 0,
+                    "actual": 0,
+                    "passed": true
+                  },
+                  {
+                    "kind": "json",
+                    "path": "total",
+                    "equals": 100,
+                    "actual": 100,
+                    "passed": true
+                  }
+                ],
+                "error": null
+              },
+              {
+                "label": "GET /quote?subtotal=100.01 (just above boundary — confirmed free shipping)",
+                "request": {
+                  "method": "GET",
+                  "path": "/quote?subtotal=100.01",
+                  "headers": {},
+                  "body": null
+                },
+                "response": {
+                  "status": 200,
+                  "headers": {
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "date": "Sun, 27 Sep 2026 12:55:29 GMT",
+                    "keep-alive": "timeout=5",
+                    "transfer-encoding": "chunked"
+                  },
+                  "body": "{\"subtotal\":100.01,\"shipping\":0,\"total\":100.01}",
+                  "truncated": false
+                },
+                "assertions": [
+                  {
+                    "kind": "status",
+                    "equals": 200,
+                    "actual": 200,
+                    "passed": true
+                  },
+                  {
+                    "kind": "json",
+                    "path": "shipping",
+                    "equals": 0,
+                    "actual": 0,
+                    "passed": true
+                  },
+                  {
+                    "kind": "json",
+                    "path": "total",
+                    "equals": 100.01,
+                    "actual": 100.01,
+                    "passed": true
+                  }
+                ],
+                "error": null
+              }
+            ],
+            "failedAssertions": 0,
+            "incomplete": 0,
+            "durationMs": 131,
+            "logs": "[stdout] Shipping service ready\n",
+            "contractHash": "73e516c1ba9a925f2bd8059266f647d87c9c19a560719bdababa31114b2da604"
+          },
+          {
+            "id": "http-3",
+            "title": "Invalid and missing subtotal inputs return 400",
+            "intent": "Validate rejection of zero, negative, non-numeric, blank, missing, and over-limit values",
+            "expected": "Status 400 with an error field for every case",
+            "basis": "documented",
+            "category": "adversarial",
+            "outcome": "passed",
+            "trace": [
+              {
+                "label": "GET /quote?subtotal=0",
+                "request": {
+                  "method": "GET",
+                  "path": "/quote?subtotal=0",
+                  "headers": {},
+                  "body": null
+                },
+                "response": {
+                  "status": 400,
+                  "headers": {
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "date": "Sun, 27 Sep 2026 12:55:33 GMT",
+                    "keep-alive": "timeout=5",
+                    "transfer-encoding": "chunked"
+                  },
+                  "body": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+                  "truncated": false
+                },
+                "assertions": [
+                  {
+                    "kind": "status",
+                    "equals": 400,
+                    "actual": 400,
+                    "passed": true
+                  },
+                  {
+                    "kind": "json",
+                    "path": "error",
+                    "equals": "Subtotal must be a number greater than 0 and at most 10000",
+                    "actual": "Subtotal must be a number greater than 0 and at most 10000",
+                    "passed": true
+                  }
+                ],
+                "error": null
+              },
+              {
+                "label": "GET /quote?subtotal=-1",
+                "request": {
+                  "method": "GET",
+                  "path": "/quote?subtotal=-1",
+                  "headers": {},
+                  "body": null
+                },
+                "response": {
+                  "status": 400,
+                  "headers": {
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "date": "Sun, 27 Sep 2026 12:55:33 GMT",
+                    "keep-alive": "timeout=5",
+                    "transfer-encoding": "chunked"
+                  },
+                  "body": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+                  "truncated": false
+                },
+                "assertions": [
+                  {
+                    "kind": "status",
+                    "equals": 400,
+                    "actual": 400,
+                    "passed": true
+                  },
+                  {
+                    "kind": "contains",
+                    "value": "error",
+                    "actual": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+                    "passed": true
+                  }
+                ],
+                "error": null
+              },
+              {
+                "label": "GET /quote?subtotal=10001 (over limit)",
+                "request": {
+                  "method": "GET",
+                  "path": "/quote?subtotal=10001",
+                  "headers": {},
+                  "body": null
+                },
+                "response": {
+                  "status": 400,
+                  "headers": {
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "date": "Sun, 27 Sep 2026 12:55:33 GMT",
+                    "keep-alive": "timeout=5",
+                    "transfer-encoding": "chunked"
+                  },
+                  "body": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+                  "truncated": false
+                },
+                "assertions": [
+                  {
+                    "kind": "status",
+                    "equals": 400,
+                    "actual": 400,
+                    "passed": true
+                  },
+                  {
+                    "kind": "contains",
+                    "value": "error",
+                    "actual": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+                    "passed": true
+                  }
+                ],
+                "error": null
+              },
+              {
+                "label": "GET /quote?subtotal=abc (non-numeric)",
+                "request": {
+                  "method": "GET",
+                  "path": "/quote?subtotal=abc",
+                  "headers": {},
+                  "body": null
+                },
+                "response": {
+                  "status": 400,
+                  "headers": {
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "date": "Sun, 27 Sep 2026 12:55:33 GMT",
+                    "keep-alive": "timeout=5",
+                    "transfer-encoding": "chunked"
+                  },
+                  "body": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+                  "truncated": false
+                },
+                "assertions": [
+                  {
+                    "kind": "status",
+                    "equals": 400,
+                    "actual": 400,
+                    "passed": true
+                  },
+                  {
+                    "kind": "contains",
+                    "value": "error",
+                    "actual": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+                    "passed": true
+                  }
+                ],
+                "error": null
+              },
+              {
+                "label": "GET /quote?subtotal= (blank)",
+                "request": {
+                  "method": "GET",
+                  "path": "/quote?subtotal=",
+                  "headers": {},
+                  "body": null
+                },
+                "response": {
+                  "status": 400,
+                  "headers": {
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "date": "Sun, 27 Sep 2026 12:55:33 GMT",
+                    "keep-alive": "timeout=5",
+                    "transfer-encoding": "chunked"
+                  },
+                  "body": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+                  "truncated": false
+                },
+                "assertions": [
+                  {
+                    "kind": "status",
+                    "equals": 400,
+                    "actual": 400,
+                    "passed": true
+                  },
+                  {
+                    "kind": "contains",
+                    "value": "error",
+                    "actual": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+                    "passed": true
+                  }
+                ],
+                "error": null
+              },
+              {
+                "label": "GET /quote (missing param)",
+                "request": {
+                  "method": "GET",
+                  "path": "/quote",
+                  "headers": {},
+                  "body": null
+                },
+                "response": {
+                  "status": 400,
+                  "headers": {
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "date": "Sun, 27 Sep 2026 12:55:33 GMT",
+                    "keep-alive": "timeout=5",
+                    "transfer-encoding": "chunked"
+                  },
+                  "body": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+                  "truncated": false
+                },
+                "assertions": [
+                  {
+                    "kind": "status",
+                    "equals": 400,
+                    "actual": 400,
+                    "passed": true
+                  },
+                  {
+                    "kind": "contains",
+                    "value": "error",
+                    "actual": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+                    "passed": true
+                  }
+                ],
+                "error": null
+              },
+              {
+                "label": "GET /quote?subtotal=Infinity",
+                "request": {
+                  "method": "GET",
+                  "path": "/quote?subtotal=Infinity",
+                  "headers": {},
+                  "body": null
+                },
+                "response": {
+                  "status": 400,
+                  "headers": {
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "date": "Sun, 27 Sep 2026 12:55:33 GMT",
+                    "keep-alive": "timeout=5",
+                    "transfer-encoding": "chunked"
+                  },
+                  "body": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+                  "truncated": false
+                },
+                "assertions": [
+                  {
+                    "kind": "status",
+                    "equals": 400,
+                    "actual": 400,
+                    "passed": true
+                  },
+                  {
+                    "kind": "contains",
+                    "value": "error",
+                    "actual": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+                    "passed": true
+                  }
+                ],
+                "error": null
+              }
+            ],
+            "failedAssertions": 0,
+            "incomplete": 0,
+            "durationMs": 141,
+            "logs": "[stdout] Shipping service ready\n",
+            "contractHash": "b36c5e0cc049e37ea439818b9aead714dd2ddba4e7d4d3eeeafb0c09453d50d2"
+          },
+          {
+            "id": "http-4",
+            "title": "Unknown routes return 404",
+            "intent": "Confirm the server responds 404 with an error body for any unregistered path",
+            "expected": "Status 404 and JSON error body for unrecognised paths; POST /quote also 404",
+            "basis": "documented",
+            "category": "adversarial",
+            "outcome": "passed",
+            "trace": [
+              {
+                "label": "GET /unknown",
+                "request": {
+                  "method": "GET",
+                  "path": "/unknown",
+                  "headers": {},
+                  "body": null
+                },
+                "response": {
+                  "status": 404,
+                  "headers": {
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "date": "Sun, 27 Sep 2026 12:55:33 GMT",
+                    "keep-alive": "timeout=5",
+                    "transfer-encoding": "chunked"
+                  },
+                  "body": "{\"error\":\"Route not found\"}",
+                  "truncated": false
+                },
+                "assertions": [
+                  {
+                    "kind": "status",
+                    "equals": 404,
+                    "actual": 404,
+                    "passed": true
+                  },
+                  {
+                    "kind": "json",
+                    "path": "error",
+                    "equals": "Route not found",
+                    "actual": "Route not found",
+                    "passed": true
+                  }
+                ],
+                "error": null
+              },
+              {
+                "label": "GET /Quote (case-sensitive)",
+                "request": {
+                  "method": "GET",
+                  "path": "/Quote",
+                  "headers": {},
+                  "body": null
+                },
+                "response": {
+                  "status": 404,
+                  "headers": {
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "date": "Sun, 27 Sep 2026 12:55:33 GMT",
+                    "keep-alive": "timeout=5",
+                    "transfer-encoding": "chunked"
+                  },
+                  "body": "{\"error\":\"Route not found\"}",
+                  "truncated": false
+                },
+                "assertions": [
+                  {
+                    "kind": "status",
+                    "equals": 404,
+                    "actual": 404,
+                    "passed": true
+                  }
+                ],
+                "error": null
+              },
+              {
+                "label": "POST /quote (method not allowed — treated as 404 by router)",
+                "request": {
+                  "method": "POST",
+                  "path": "/quote",
+                  "headers": {
+                    "content-type": "application/json"
+                  },
+                  "body": "null"
+                },
+                "response": {
+                  "status": 404,
+                  "headers": {
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "date": "Sun, 27 Sep 2026 12:55:33 GMT",
+                    "keep-alive": "timeout=5",
+                    "transfer-encoding": "chunked"
+                  },
+                  "body": "{\"error\":\"Route not found\"}",
+                  "truncated": false
+                },
+                "assertions": [
+                  {
+                    "kind": "status",
+                    "equals": 404,
+                    "actual": 404,
+                    "passed": true
+                  }
+                ],
+                "error": null
+              },
+              {
+                "label": "GET /quote/ (trailing slash)",
+                "request": {
+                  "method": "GET",
+                  "path": "/quote/",
+                  "headers": {},
+                  "body": null
+                },
+                "response": {
+                  "status": 404,
+                  "headers": {
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "date": "Sun, 27 Sep 2026 12:55:33 GMT",
+                    "keep-alive": "timeout=5",
+                    "transfer-encoding": "chunked"
+                  },
+                  "body": "{\"error\":\"Route not found\"}",
+                  "truncated": false
+                },
+                "assertions": [
+                  {
+                    "kind": "status",
+                    "equals": 404,
+                    "actual": 404,
+                    "passed": true
+                  }
+                ],
+                "error": null
+              }
+            ],
+            "failedAssertions": 0,
+            "incomplete": 0,
+            "durationMs": 89,
+            "logs": "[stdout] Shipping service ready\n",
+            "contractHash": "21c2b7f6ca2b1e057d3d0fa2f6173653ee650a951d122f8f01ee3b0f4cb086ec"
+          },
+          {
+            "id": "http-5",
+            "title": "GET / serves the HTML checkout page",
+            "intent": "Confirm the homepage returns the HTML form with correct content-type",
+            "expected": "Status 200, content-type text/html, body contains the form",
+            "basis": "documented",
+            "category": "normal",
+            "outcome": "passed",
+            "trace": [
+              {
+                "label": "GET /",
+                "request": {
+                  "method": "GET",
+                  "path": "/",
+                  "headers": {},
+                  "body": null
+                },
+                "response": {
+                  "status": 200,
+                  "headers": {
+                    "connection": "keep-alive",
+                    "content-length": "1108",
+                    "content-type": "text/html; charset=utf-8",
+                    "date": "Sun, 27 Sep 2026 12:55:37 GMT",
+                    "keep-alive": "timeout=5"
+                  },
+                  "body": "<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><title>Shipping quote</title><style>body{font:18px system-ui;color:#23372e;background:#f5f5ef;margin:80px auto;max-width:560px}main{background:white;padding:40px;border:1px solid #dde3db;border-radius:8px}input,button{font:inherit;padding:12px}button{background:#2e5747;color:white;border:0}label{display:block;margin:24px 0 8px}output{display:block;margin-top:24px}</style><main><small>CHECKOUT</small><h1>Know your total.</h1><p>Delivery is $5. Orders of $100 or more ship free.</p><form><label for=\"subtotal\">Order subtotal ($)</label><input id=\"subtotal\" name=\"subtotal\" type=\"number\" step=\"0.01\" value=\"100\" required><button>Get quote</button></form><output aria-live=\"polite\" id=\"quote\"></output></main><script>document.querySelector('form').onsubmit=async e=>{e.preventDefault();const r=await fetch('/quote?subtotal='+encodeURIComponent(document.querySelector('#subtotal').value));const q=await r.json();document.querySelector('#quote').textContent=q.error||('Delivery: $'+q.shipping.toFixed(2)+' · Total: $'+q.total.toFixed(2));};</script></html>",
+                  "truncated": false
+                },
+                "assertions": [
+                  {
+                    "kind": "status",
+                    "equals": 200,
+                    "actual": 200,
+                    "passed": true
+                  },
+                  {
+                    "kind": "header",
+                    "name": "content-type",
+                    "equals": "text/html; charset=utf-8",
+                    "actual": "text/html; charset=utf-8",
+                    "passed": true
+                  },
+                  {
+                    "kind": "contains",
+                    "value": "<form>",
+                    "actual": "<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><title>Shipping quote</title><style>body{font:18px system-ui;color:#23372e;background:#f5f5ef;margin:80px auto;max-width:560px}main{background:white;padding:40px;border:1px solid #dde3db;border-radius:8px}input,button{font:inherit;padding:12px}button{background:#2e5747;color:white;border:0}label{display:block;margin:24px 0 8px}output{display:block;margin-top:24px}</style><main><small>CHECKOUT</small><h1>Know your total.</h1><p>Delivery is $5. Orders of $100 or more ship free.</p><form><label for=\"subtotal\">Order subtotal ($)</label><input id=\"subtotal\" name=\"subtotal\" type=\"number\" step=\"0.01\" value=\"100\" required><button>Get quote</button></form><output aria-live=\"polite\" id=\"quote\"></output></main><script>document.querySelector('form').onsubmit=async e=>{e.preventDefault();const r=await fetch('/quote?subtotal='+encodeURIComponent(document.querySelector('#subtotal').value));const q=await r.json();document.querySelector('#quote').textContent=q.error||('Delivery: $'+q.shipping.toFixed(2)+' · Total: $'+q.total.toFixed(2));};</script></html>",
+                    "passed": true
+                  },
+                  {
+                    "kind": "contains",
+                    "value": "subtotal",
+                    "actual": "<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><title>Shipping quote</title><style>body{font:18px system-ui;color:#23372e;background:#f5f5ef;margin:80px auto;max-width:560px}main{background:white;padding:40px;border:1px solid #dde3db;border-radius:8px}input,button{font:inherit;padding:12px}button{background:#2e5747;color:white;border:0}label{display:block;margin:24px 0 8px}output{display:block;margin-top:24px}</style><main><small>CHECKOUT</small><h1>Know your total.</h1><p>Delivery is $5. Orders of $100 or more ship free.</p><form><label for=\"subtotal\">Order subtotal ($)</label><input id=\"subtotal\" name=\"subtotal\" type=\"number\" step=\"0.01\" value=\"100\" required><button>Get quote</button></form><output aria-live=\"polite\" id=\"quote\"></output></main><script>document.querySelector('form').onsubmit=async e=>{e.preventDefault();const r=await fetch('/quote?subtotal='+encodeURIComponent(document.querySelector('#subtotal').value));const q=await r.json();document.querySelector('#quote').textContent=q.error||('Delivery: $'+q.shipping.toFixed(2)+' · Total: $'+q.total.toFixed(2));};</script></html>",
+                    "passed": true
+                  }
+                ],
+                "error": null
+              }
+            ],
+            "failedAssertions": 0,
+            "incomplete": 0,
+            "durationMs": 111,
+            "logs": "[stdout] Shipping service ready\n",
+            "contractHash": "b3044b7617f736aa6a0f9f27f5fc259837a464b9267d6f7b9d8a5298686218b4"
+          },
+          {
+            "id": "http-6",
+            "title": "Content-type is application/json on API responses",
+            "intent": "Ensure the API sets the correct content-type header for both success and error responses",
+            "expected": "content-type: application/json on 200 and 400 responses",
+            "basis": "documented",
+            "category": "normal",
+            "outcome": "passed",
+            "trace": [
+              {
+                "label": "Successful quote content-type",
+                "request": {
+                  "method": "GET",
+                  "path": "/quote?subtotal=50",
+                  "headers": {},
+                  "body": null
+                },
+                "response": {
+                  "status": 200,
+                  "headers": {
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "date": "Sun, 27 Sep 2026 12:55:37 GMT",
+                    "keep-alive": "timeout=5",
+                    "transfer-encoding": "chunked"
+                  },
+                  "body": "{\"subtotal\":50,\"shipping\":5,\"total\":55}",
+                  "truncated": false
+                },
+                "assertions": [
+                  {
+                    "kind": "status",
+                    "equals": 200,
+                    "actual": 200,
+                    "passed": true
+                  },
+                  {
+                    "kind": "header",
+                    "name": "content-type",
+                    "equals": "application/json",
+                    "actual": "application/json",
+                    "passed": true
+                  }
+                ],
+                "error": null
+              },
+              {
+                "label": "Error response content-type",
+                "request": {
+                  "method": "GET",
+                  "path": "/quote?subtotal=0",
+                  "headers": {},
+                  "body": null
+                },
+                "response": {
+                  "status": 400,
+                  "headers": {
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "date": "Sun, 27 Sep 2026 12:55:37 GMT",
+                    "keep-alive": "timeout=5",
+                    "transfer-encoding": "chunked"
+                  },
+                  "body": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+                  "truncated": false
+                },
+                "assertions": [
+                  {
+                    "kind": "status",
+                    "equals": 400,
+                    "actual": 400,
+                    "passed": true
+                  },
+                  {
+                    "kind": "header",
+                    "name": "content-type",
+                    "equals": "application/json",
+                    "actual": "application/json",
+                    "passed": true
+                  }
+                ],
+                "error": null
+              }
+            ],
+            "failedAssertions": 0,
+            "incomplete": 0,
+            "durationMs": 121,
+            "logs": "[stdout] Shipping service ready\n",
+            "contractHash": "6fd73083be10e45c3da392938d3994a5b4135d55b1b89e20a787882059dfe361"
+          },
+          {
+            "id": "adversarial-0",
+            "title": "Malformed and unexpected inputs: POST /quote",
+            "intent": "Exercise malformed JSON, null, arrays, missing values, unexpected types and numeric boundaries. Detect unhandled HTTP 5xx responses.",
+            "expected": "Bad inputs are handled without an unhandled server error. Exact domain rejection status is not assumed.",
+            "basis": "assumption",
+            "category": "input-validation",
+            "outcome": "passed",
+            "trace": [
+              {
+                "label": "Malformed JSON",
+                "request": {
+                  "method": "POST",
+                  "path": "/quote",
+                  "headers": {
+                    "content-type": "application/json"
+                  },
+                  "body": "{\"broken\":"
+                },
+                "response": {
+                  "status": 404,
+                  "headers": {
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "date": "Sun, 27 Sep 2026 12:55:40 GMT",
+                    "keep-alive": "timeout=5",
+                    "transfer-encoding": "chunked"
+                  },
+                  "body": "{\"error\":\"Route not found\"}",
+                  "truncated": false
+                },
+                "assertions": [
+                  {
+                    "kind": "not5xx",
+                    "actual": 404,
+                    "passed": true
+                  }
+                ],
+                "error": null
+              },
+              {
+                "label": "Unexpected input 0",
+                "request": {
+                  "method": "POST",
+                  "path": "/quote",
+                  "headers": {
+                    "content-type": "application/json"
+                  },
+                  "body": "null"
+                },
+                "response": {
+                  "status": 404,
+                  "headers": {
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "date": "Sun, 27 Sep 2026 12:55:40 GMT",
+                    "keep-alive": "timeout=5",
+                    "transfer-encoding": "chunked"
+                  },
+                  "body": "{\"error\":\"Route not found\"}",
+                  "truncated": false
+                },
+                "assertions": [
+                  {
+                    "kind": "not5xx",
+                    "actual": 404,
+                    "passed": true
+                  }
+                ],
+                "error": null
+              },
+              {
+                "label": "Unexpected input 1",
+                "request": {
+                  "method": "POST",
+                  "path": "/quote",
+                  "headers": {
+                    "content-type": "application/json"
+                  },
+                  "body": "[]"
+                },
+                "response": {
+                  "status": 404,
+                  "headers": {
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "date": "Sun, 27 Sep 2026 12:55:40 GMT",
+                    "keep-alive": "timeout=5",
+                    "transfer-encoding": "chunked"
+                  },
+                  "body": "{\"error\":\"Route not found\"}",
+                  "truncated": false
+                },
+                "assertions": [
+                  {
+                    "kind": "not5xx",
+                    "actual": 404,
+                    "passed": true
+                  }
+                ],
+                "error": null
+              },
+              {
+                "label": "Unexpected input 2",
+                "request": {
+                  "method": "POST",
+                  "path": "/quote",
+                  "headers": {
+                    "content-type": "application/json"
+                  },
+                  "body": "{}"
+                },
+                "response": {
+                  "status": 404,
+                  "headers": {
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "date": "Sun, 27 Sep 2026 12:55:40 GMT",
+                    "keep-alive": "timeout=5",
+                    "transfer-encoding": "chunked"
+                  },
+                  "body": "{\"error\":\"Route not found\"}",
+                  "truncated": false
+                },
+                "assertions": [
+                  {
+                    "kind": "not5xx",
+                    "actual": 404,
+                    "passed": true
+                  }
+                ],
+                "error": null
+              },
+              {
+                "label": "Unexpected input 3",
+                "request": {
+                  "method": "POST",
+                  "path": "/quote",
+                  "headers": {
+                    "content-type": "application/json"
+                  },
+                  "body": "\"unexpected\""
+                },
+                "response": {
+                  "status": 404,
+                  "headers": {
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "date": "Sun, 27 Sep 2026 12:55:40 GMT",
+                    "keep-alive": "timeout=5",
+                    "transfer-encoding": "chunked"
+                  },
+                  "body": "{\"error\":\"Route not found\"}",
+                  "truncated": false
+                },
+                "assertions": [
+                  {
+                    "kind": "not5xx",
+                    "actual": 404,
+                    "passed": true
+                  }
+                ],
+                "error": null
+              },
+              {
+                "label": "Unexpected input 4",
+                "request": {
+                  "method": "POST",
+                  "path": "/quote",
+                  "headers": {
+                    "content-type": "application/json"
+                  },
+                  "body": "{}"
+                },
+                "response": {
+                  "status": 404,
+                  "headers": {
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "date": "Sun, 27 Sep 2026 12:55:40 GMT",
+                    "keep-alive": "timeout=5",
+                    "transfer-encoding": "chunked"
+                  },
+                  "body": "{\"error\":\"Route not found\"}",
+                  "truncated": false
+                },
+                "assertions": [
+                  {
+                    "kind": "not5xx",
+                    "actual": 404,
+                    "passed": true
+                  }
+                ],
+                "error": null
+              }
+            ],
+            "failedAssertions": 0,
+            "incomplete": 0,
+            "durationMs": 107,
+            "logs": "[stdout] Shipping service ready\n",
+            "contractHash": "006c3b0e2378c8a795662ca896ebaab9271ee50a5e6e3097088188255f73f716"
+          },
+          {
+            "id": "browser-1",
+            "title": "Happy-path quote submission",
+            "intent": "User enters a valid subtotal, submits the form, and sees the delivery charge and total",
+            "expected": "Output element shows Delivery and Total values matching the API response",
+            "basis": "documented",
+            "category": "frontend",
+            "outcome": "passed",
+            "trace": [
+              {
+                "action": {
+                  "action": "goto",
+                  "path": "/"
+                },
+                "error": null
+              },
+              {
+                "action": {
+                  "action": "visible",
+                  "selector": "form"
+                },
+                "error": null
+              },
+              {
+                "action": {
+                  "action": "fill",
+                  "selector": "#subtotal",
+                  "value": "50"
+                },
+                "error": null
+              },
+              {
+                "action": {
+                  "action": "click",
+                  "selector": "button"
+                },
+                "error": null
+              },
+              {
+                "action": {
+                  "action": "text",
+                  "selector": "#quote",
+                  "value": "Delivery: $5.00"
+                },
+                "error": null
+              },
+              {
+                "action": {
+                  "action": "text",
+                  "selector": "#quote",
+                  "value": "Total: $55.00"
+                },
+                "error": null
+              }
+            ],
+            "errors": [],
+            "observations": [],
+            "requests": [],
+            "network": [
+              {
+                "action": {
+                  "action": "goto",
+                  "path": "/"
+                },
+                "url": "http://127.0.0.1:3100/",
+                "method": "GET",
+                "status": 200
+              },
+              {
+                "action": {
+                  "action": "text",
+                  "selector": "#quote",
+                  "value": "Delivery: $5.00"
+                },
+                "url": "http://127.0.0.1:3100/quote?subtotal=50",
+                "method": "GET",
+                "status": 200
+              }
+            ],
+            "durationMs": 369,
+            "screenshot": "proofrun-9328f562-2e5-browser-1-final.png",
+            "limitations": [],
+            "logs": "[stdout] Shipping service ready\n",
+            "contractHash": "84a6359d76e397493634859908720ac6b61113344f9e80fed021a42c88a0ac6b"
+          },
+          {
+            "id": "browser-2",
+            "title": "Free-shipping boundary quote in browser",
+            "intent": "Submit subtotal=150 and verify the form displays zero shipping cost",
+            "expected": "Output shows Delivery: $0.00 and Total: $150.00",
+            "basis": "documented",
+            "category": "frontend",
+            "outcome": "passed",
+            "trace": [
+              {
+                "action": {
+                  "action": "goto",
+                  "path": "/"
+                },
+                "error": null
+              },
+              {
+                "action": {
+                  "action": "fill",
+                  "selector": "#subtotal",
+                  "value": "150"
+                },
+                "error": null
+              },
+              {
+                "action": {
+                  "action": "click",
+                  "selector": "button"
+                },
+                "error": null
+              },
+              {
+                "action": {
+                  "action": "text",
+                  "selector": "#quote",
+                  "value": "Delivery: $0.00"
+                },
+                "error": null
+              },
+              {
+                "action": {
+                  "action": "text",
+                  "selector": "#quote",
+                  "value": "Total: $150.00"
+                },
+                "error": null
+              }
+            ],
+            "errors": [],
+            "observations": [],
+            "requests": [],
+            "network": [
+              {
+                "action": {
+                  "action": "goto",
+                  "path": "/"
+                },
+                "url": "http://127.0.0.1:3100/",
+                "method": "GET",
+                "status": 200
+              },
+              {
+                "action": {
+                  "action": "text",
+                  "selector": "#quote",
+                  "value": "Delivery: $0.00"
+                },
+                "url": "http://127.0.0.1:3100/quote?subtotal=150",
+                "method": "GET",
+                "status": 200
+              }
+            ],
+            "durationMs": 396,
+            "screenshot": "proofrun-6c1c20aa-491-browser-2-final.png",
+            "limitations": [],
+            "logs": "[stdout] Shipping service ready\n",
+            "contractHash": "592d6ec307d13b619a3cb1982fe60261944dde03a44244293117245c346694c4"
+          },
+          {
+            "id": "browser-3",
+            "title": "Missing subtotal triggers native browser validation",
+            "intent": "Clear the required number input and attempt submission; native validation must block the request",
+            "expected": "#subtotal is in an invalid state and no network request is made",
+            "basis": "documented",
+            "category": "frontend",
+            "outcome": "passed",
+            "trace": [
+              {
+                "action": {
+                  "action": "goto",
+                  "path": "/"
+                },
+                "error": null
+              },
+              {
+                "action": {
+                  "action": "fill",
+                  "selector": "#subtotal",
+                  "value": ""
+                },
+                "error": null
+              },
+              {
+                "action": {
+                  "action": "click",
+                  "selector": "button"
+                },
+                "error": null
+              },
+              {
+                "action": {
+                  "action": "invalid",
+                  "selector": "#subtotal"
+                },
+                "error": null,
+                "validation": {
+                  "valid": false,
+                  "willValidate": true,
+                  "message": "Please fill out this field.",
+                  "value": ""
+                }
+              }
+            ],
+            "errors": [],
+            "observations": [],
+            "requests": [],
+            "network": [
+              {
+                "action": {
+                  "action": "goto",
+                  "path": "/"
+                },
+                "url": "http://127.0.0.1:3100/",
+                "method": "GET",
+                "status": 200
+              }
+            ],
+            "durationMs": 389,
+            "screenshot": "proofrun-8c3f9216-903-browser-3-final.png",
+            "limitations": [],
+            "logs": "[stdout] Shipping service ready\n",
+            "contractHash": "ac4c14a5ea48f5a8aa54e54eb72b78a0c2408e4daa7c4f195b562869f486ea5b"
+          }
+        ],
+        "existingTests": [
+          {
+            "argv": [
+              "node",
+              "--test",
+              "tests/*.test.mjs"
+            ],
+            "exitCode": 0,
+            "signal": null,
+            "timedOut": false,
+            "stdout": "TAP version 13\n# Subtest: ordinary orders have a five dollar delivery charge\nok 1 - ordinary orders have a five dollar delivery charge\n  ---\n  duration_ms: 1.427691\n  type: 'test'\n  ...\n# Subtest: large orders ship free\nok 2 - large orders ship free\n  ---\n  duration_ms: 0.236565\n  type: 'test'\n  ...\n# Subtest: invalid amounts are rejected\nok 3 - invalid amounts are rejected\n  ---\n  duration_ms: 0.263272\n  type: 'test'\n  ...\n1..3\n# tests 3\n# suites 0\n# pass 3\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 71.537669\n",
+            "stderr": "",
+            "durationMs": 226,
+            "truncated": false,
+            "label": "Run unit tests",
+            "timeoutSeconds": 600,
+            "cwd": "."
+          }
+        ],
+        "resolved": true,
+        "regressions": []
+      }
+    }
+  ],
+  "latestValidation": {
+    "time": "2026-09-27T12:55:50.506Z",
+    "sourceSnapshot": "86391d3db9dee0391b059bc8f0eda82f21d18f00f5815b4aa32aecf854af6fda",
+    "fixId": "9f480802-3a86-453c-96c7-67966b58eb19",
+    "fixIds": [
+      "9f480802-3a86-453c-96c7-67966b58eb19"
+    ],
+    "contractsUnchanged": true,
+    "results": [
+      {
+        "id": "existing-0",
+        "title": "Run unit tests",
+        "category": "existing test suite",
+        "expected": "Command completes with exit code 0",
+        "outcome": "passed",
+        "contractHash": "8a52d0d692598ab150bb6ab288a480aa92e99f92a2e17b3a25701dad124f37a0",
+        "logs": "TAP version 13\n# Subtest: ordinary orders have a five dollar delivery charge\nok 1 - ordinary orders have a five dollar delivery charge\n  ---\n  duration_ms: 1.427691\n  type: 'test'\n  ...\n# Subtest: large orders ship free\nok 2 - large orders ship free\n  ---\n  duration_ms: 0.236565\n  type: 'test'\n  ...\n# Subtest: invalid amounts are rejected\nok 3 - invalid amounts are rejected\n  ---\n  duration_ms: 0.263272\n  type: 'test'\n  ...\n1..3\n# tests 3\n# suites 0\n# pass 3\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 71.537669\n\n",
+        "trace": [
+          {
+            "label": "Run unit tests",
+            "request": {
+              "argv": [
+                "node",
+                "--test",
+                "tests/*.test.mjs"
+              ]
+            },
+            "response": {
+              "exitCode": 0
+            },
+            "error": null
+          }
+        ]
+      },
+      {
+        "id": "http-1",
+        "title": "Normal quote below $100",
+        "intent": "Verify a standard paid-shipping order returns correct subtotal, shipping, and total",
+        "expected": "{subtotal:50,shipping:5,total:55} with status 200",
+        "basis": "documented",
+        "category": "normal",
+        "outcome": "passed",
+        "trace": [
+          {
+            "label": "GET /quote?subtotal=50",
+            "request": {
+              "method": "GET",
+              "path": "/quote?subtotal=50",
+              "headers": {},
+              "body": null
+            },
+            "response": {
+              "status": 200,
+              "headers": {
+                "connection": "keep-alive",
+                "content-type": "application/json",
+                "date": "Sun, 27 Sep 2026 12:55:29 GMT",
+                "keep-alive": "timeout=5",
+                "transfer-encoding": "chunked"
+              },
+              "body": "{\"subtotal\":50,\"shipping\":5,\"total\":55}",
+              "truncated": false
+            },
+            "assertions": [
+              {
+                "kind": "status",
+                "equals": 200,
+                "actual": 200,
+                "passed": true
+              },
+              {
+                "kind": "json",
+                "path": "subtotal",
+                "equals": 50,
+                "actual": 50,
+                "passed": true
+              },
+              {
+                "kind": "json",
+                "path": "shipping",
+                "equals": 5,
+                "actual": 5,
+                "passed": true
+              },
+              {
+                "kind": "json",
+                "path": "total",
+                "equals": 55,
+                "actual": 55,
+                "passed": true
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "GET /quote?subtotal=0.01 (minimum valid)",
+            "request": {
+              "method": "GET",
+              "path": "/quote?subtotal=0.01",
+              "headers": {},
+              "body": null
+            },
+            "response": {
+              "status": 200,
+              "headers": {
+                "connection": "keep-alive",
+                "content-type": "application/json",
+                "date": "Sun, 27 Sep 2026 12:55:29 GMT",
+                "keep-alive": "timeout=5",
+                "transfer-encoding": "chunked"
+              },
+              "body": "{\"subtotal\":0.01,\"shipping\":5,\"total\":5.01}",
+              "truncated": false
+            },
+            "assertions": [
+              {
+                "kind": "status",
+                "equals": 200,
+                "actual": 200,
+                "passed": true
+              },
+              {
+                "kind": "json",
+                "path": "subtotal",
+                "equals": 0.01,
+                "actual": 0.01,
+                "passed": true
+              },
+              {
+                "kind": "json",
+                "path": "shipping",
+                "equals": 5,
+                "actual": 5,
+                "passed": true
+              },
+              {
+                "kind": "json",
+                "path": "total",
+                "equals": 5.01,
+                "actual": 5.01,
+                "passed": true
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "GET /quote?subtotal=99.99 (just below free-shipping boundary)",
+            "request": {
+              "method": "GET",
+              "path": "/quote?subtotal=99.99",
+              "headers": {},
+              "body": null
+            },
+            "response": {
+              "status": 200,
+              "headers": {
+                "connection": "keep-alive",
+                "content-type": "application/json",
+                "date": "Sun, 27 Sep 2026 12:55:29 GMT",
+                "keep-alive": "timeout=5",
+                "transfer-encoding": "chunked"
+              },
+              "body": "{\"subtotal\":99.99,\"shipping\":5,\"total\":104.99}",
+              "truncated": false
+            },
+            "assertions": [
+              {
+                "kind": "status",
+                "equals": 200,
+                "actual": 200,
+                "passed": true
+              },
+              {
+                "kind": "json",
+                "path": "shipping",
+                "equals": 5,
+                "actual": 5,
+                "passed": true
+              },
+              {
+                "kind": "json",
+                "path": "total",
+                "equals": 104.99,
+                "actual": 104.99,
+                "passed": true
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "GET /quote?subtotal=10000 (maximum valid)",
+            "request": {
+              "method": "GET",
+              "path": "/quote?subtotal=10000",
+              "headers": {},
+              "body": null
+            },
+            "response": {
+              "status": 200,
+              "headers": {
+                "connection": "keep-alive",
+                "content-type": "application/json",
+                "date": "Sun, 27 Sep 2026 12:55:29 GMT",
+                "keep-alive": "timeout=5",
+                "transfer-encoding": "chunked"
+              },
+              "body": "{\"subtotal\":10000,\"shipping\":0,\"total\":10000}",
+              "truncated": false
+            },
+            "assertions": [
+              {
+                "kind": "status",
+                "equals": 200,
+                "actual": 200,
+                "passed": true
+              },
+              {
+                "kind": "json",
+                "path": "shipping",
+                "equals": 0,
+                "actual": 0,
+                "passed": true
+              },
+              {
+                "kind": "json",
+                "path": "total",
+                "equals": 10000,
+                "actual": 10000,
+                "passed": true
+              }
+            ],
+            "error": null
+          }
+        ],
+        "failedAssertions": 0,
+        "incomplete": 0,
+        "durationMs": 145,
+        "logs": "[stdout] Shipping service ready\n",
+        "contractHash": "5dee0c0e48f9f4e0871f4bf944860d63a640be4a4f9dcc0602072941f15679e6"
+      },
+      {
+        "id": "http-2",
+        "title": "Free-shipping boundary at exactly $100",
+        "intent": "Expose the deliberate defect: subtotal=100 should yield shipping=0 but the > condition charges $5",
+        "expected": "Status 200 with shipping:0 and total:100 (current code fails this — shipping.mjs uses > instead of >=)",
+        "basis": "assumption",
+        "category": "boundary",
+        "outcome": "passed",
+        "trace": [
+          {
+            "label": "GET /quote?subtotal=100 (boundary — free shipping spec)",
+            "request": {
+              "method": "GET",
+              "path": "/quote?subtotal=100",
+              "headers": {},
+              "body": null
+            },
+            "response": {
+              "status": 200,
+              "headers": {
+                "connection": "keep-alive",
+                "content-type": "application/json",
+                "date": "Sun, 27 Sep 2026 12:55:29 GMT",
+                "keep-alive": "timeout=5",
+                "transfer-encoding": "chunked"
+              },
+              "body": "{\"subtotal\":100,\"shipping\":0,\"total\":100}",
+              "truncated": false
+            },
+            "assertions": [
+              {
+                "kind": "status",
+                "equals": 200,
+                "actual": 200,
+                "passed": true
+              },
+              {
+                "kind": "json",
+                "path": "subtotal",
+                "equals": 100,
+                "actual": 100,
+                "passed": true
+              },
+              {
+                "kind": "json",
+                "path": "shipping",
+                "equals": 0,
+                "actual": 0,
+                "passed": true
+              },
+              {
+                "kind": "json",
+                "path": "total",
+                "equals": 100,
+                "actual": 100,
+                "passed": true
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "GET /quote?subtotal=100.01 (just above boundary — confirmed free shipping)",
+            "request": {
+              "method": "GET",
+              "path": "/quote?subtotal=100.01",
+              "headers": {},
+              "body": null
+            },
+            "response": {
+              "status": 200,
+              "headers": {
+                "connection": "keep-alive",
+                "content-type": "application/json",
+                "date": "Sun, 27 Sep 2026 12:55:29 GMT",
+                "keep-alive": "timeout=5",
+                "transfer-encoding": "chunked"
+              },
+              "body": "{\"subtotal\":100.01,\"shipping\":0,\"total\":100.01}",
+              "truncated": false
+            },
+            "assertions": [
+              {
+                "kind": "status",
+                "equals": 200,
+                "actual": 200,
+                "passed": true
+              },
+              {
+                "kind": "json",
+                "path": "shipping",
+                "equals": 0,
+                "actual": 0,
+                "passed": true
+              },
+              {
+                "kind": "json",
+                "path": "total",
+                "equals": 100.01,
+                "actual": 100.01,
+                "passed": true
+              }
+            ],
+            "error": null
+          }
+        ],
+        "failedAssertions": 0,
+        "incomplete": 0,
+        "durationMs": 131,
+        "logs": "[stdout] Shipping service ready\n",
+        "contractHash": "73e516c1ba9a925f2bd8059266f647d87c9c19a560719bdababa31114b2da604"
+      },
+      {
+        "id": "http-3",
+        "title": "Invalid and missing subtotal inputs return 400",
+        "intent": "Validate rejection of zero, negative, non-numeric, blank, missing, and over-limit values",
+        "expected": "Status 400 with an error field for every case",
+        "basis": "documented",
+        "category": "adversarial",
+        "outcome": "passed",
+        "trace": [
+          {
+            "label": "GET /quote?subtotal=0",
+            "request": {
+              "method": "GET",
+              "path": "/quote?subtotal=0",
+              "headers": {},
+              "body": null
+            },
+            "response": {
+              "status": 400,
+              "headers": {
+                "connection": "keep-alive",
+                "content-type": "application/json",
+                "date": "Sun, 27 Sep 2026 12:55:33 GMT",
+                "keep-alive": "timeout=5",
+                "transfer-encoding": "chunked"
+              },
+              "body": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+              "truncated": false
+            },
+            "assertions": [
+              {
+                "kind": "status",
+                "equals": 400,
+                "actual": 400,
+                "passed": true
+              },
+              {
+                "kind": "json",
+                "path": "error",
+                "equals": "Subtotal must be a number greater than 0 and at most 10000",
+                "actual": "Subtotal must be a number greater than 0 and at most 10000",
+                "passed": true
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "GET /quote?subtotal=-1",
+            "request": {
+              "method": "GET",
+              "path": "/quote?subtotal=-1",
+              "headers": {},
+              "body": null
+            },
+            "response": {
+              "status": 400,
+              "headers": {
+                "connection": "keep-alive",
+                "content-type": "application/json",
+                "date": "Sun, 27 Sep 2026 12:55:33 GMT",
+                "keep-alive": "timeout=5",
+                "transfer-encoding": "chunked"
+              },
+              "body": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+              "truncated": false
+            },
+            "assertions": [
+              {
+                "kind": "status",
+                "equals": 400,
+                "actual": 400,
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "error",
+                "actual": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+                "passed": true
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "GET /quote?subtotal=10001 (over limit)",
+            "request": {
+              "method": "GET",
+              "path": "/quote?subtotal=10001",
+              "headers": {},
+              "body": null
+            },
+            "response": {
+              "status": 400,
+              "headers": {
+                "connection": "keep-alive",
+                "content-type": "application/json",
+                "date": "Sun, 27 Sep 2026 12:55:33 GMT",
+                "keep-alive": "timeout=5",
+                "transfer-encoding": "chunked"
+              },
+              "body": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+              "truncated": false
+            },
+            "assertions": [
+              {
+                "kind": "status",
+                "equals": 400,
+                "actual": 400,
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "error",
+                "actual": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+                "passed": true
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "GET /quote?subtotal=abc (non-numeric)",
+            "request": {
+              "method": "GET",
+              "path": "/quote?subtotal=abc",
+              "headers": {},
+              "body": null
+            },
+            "response": {
+              "status": 400,
+              "headers": {
+                "connection": "keep-alive",
+                "content-type": "application/json",
+                "date": "Sun, 27 Sep 2026 12:55:33 GMT",
+                "keep-alive": "timeout=5",
+                "transfer-encoding": "chunked"
+              },
+              "body": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+              "truncated": false
+            },
+            "assertions": [
+              {
+                "kind": "status",
+                "equals": 400,
+                "actual": 400,
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "error",
+                "actual": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+                "passed": true
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "GET /quote?subtotal= (blank)",
+            "request": {
+              "method": "GET",
+              "path": "/quote?subtotal=",
+              "headers": {},
+              "body": null
+            },
+            "response": {
+              "status": 400,
+              "headers": {
+                "connection": "keep-alive",
+                "content-type": "application/json",
+                "date": "Sun, 27 Sep 2026 12:55:33 GMT",
+                "keep-alive": "timeout=5",
+                "transfer-encoding": "chunked"
+              },
+              "body": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+              "truncated": false
+            },
+            "assertions": [
+              {
+                "kind": "status",
+                "equals": 400,
+                "actual": 400,
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "error",
+                "actual": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+                "passed": true
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "GET /quote (missing param)",
+            "request": {
+              "method": "GET",
+              "path": "/quote",
+              "headers": {},
+              "body": null
+            },
+            "response": {
+              "status": 400,
+              "headers": {
+                "connection": "keep-alive",
+                "content-type": "application/json",
+                "date": "Sun, 27 Sep 2026 12:55:33 GMT",
+                "keep-alive": "timeout=5",
+                "transfer-encoding": "chunked"
+              },
+              "body": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+              "truncated": false
+            },
+            "assertions": [
+              {
+                "kind": "status",
+                "equals": 400,
+                "actual": 400,
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "error",
+                "actual": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+                "passed": true
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "GET /quote?subtotal=Infinity",
+            "request": {
+              "method": "GET",
+              "path": "/quote?subtotal=Infinity",
+              "headers": {},
+              "body": null
+            },
+            "response": {
+              "status": 400,
+              "headers": {
+                "connection": "keep-alive",
+                "content-type": "application/json",
+                "date": "Sun, 27 Sep 2026 12:55:33 GMT",
+                "keep-alive": "timeout=5",
+                "transfer-encoding": "chunked"
+              },
+              "body": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+              "truncated": false
+            },
+            "assertions": [
+              {
+                "kind": "status",
+                "equals": 400,
+                "actual": 400,
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "error",
+                "actual": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+                "passed": true
+              }
+            ],
+            "error": null
+          }
+        ],
+        "failedAssertions": 0,
+        "incomplete": 0,
+        "durationMs": 141,
+        "logs": "[stdout] Shipping service ready\n",
+        "contractHash": "b36c5e0cc049e37ea439818b9aead714dd2ddba4e7d4d3eeeafb0c09453d50d2"
+      },
+      {
+        "id": "http-4",
+        "title": "Unknown routes return 404",
+        "intent": "Confirm the server responds 404 with an error body for any unregistered path",
+        "expected": "Status 404 and JSON error body for unrecognised paths; POST /quote also 404",
+        "basis": "documented",
+        "category": "adversarial",
+        "outcome": "passed",
+        "trace": [
+          {
+            "label": "GET /unknown",
+            "request": {
+              "method": "GET",
+              "path": "/unknown",
+              "headers": {},
+              "body": null
+            },
+            "response": {
+              "status": 404,
+              "headers": {
+                "connection": "keep-alive",
+                "content-type": "application/json",
+                "date": "Sun, 27 Sep 2026 12:55:33 GMT",
+                "keep-alive": "timeout=5",
+                "transfer-encoding": "chunked"
+              },
+              "body": "{\"error\":\"Route not found\"}",
+              "truncated": false
+            },
+            "assertions": [
+              {
+                "kind": "status",
+                "equals": 404,
+                "actual": 404,
+                "passed": true
+              },
+              {
+                "kind": "json",
+                "path": "error",
+                "equals": "Route not found",
+                "actual": "Route not found",
+                "passed": true
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "GET /Quote (case-sensitive)",
+            "request": {
+              "method": "GET",
+              "path": "/Quote",
+              "headers": {},
+              "body": null
+            },
+            "response": {
+              "status": 404,
+              "headers": {
+                "connection": "keep-alive",
+                "content-type": "application/json",
+                "date": "Sun, 27 Sep 2026 12:55:33 GMT",
+                "keep-alive": "timeout=5",
+                "transfer-encoding": "chunked"
+              },
+              "body": "{\"error\":\"Route not found\"}",
+              "truncated": false
+            },
+            "assertions": [
+              {
+                "kind": "status",
+                "equals": 404,
+                "actual": 404,
+                "passed": true
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "POST /quote (method not allowed — treated as 404 by router)",
+            "request": {
+              "method": "POST",
+              "path": "/quote",
+              "headers": {
+                "content-type": "application/json"
+              },
+              "body": "null"
+            },
+            "response": {
+              "status": 404,
+              "headers": {
+                "connection": "keep-alive",
+                "content-type": "application/json",
+                "date": "Sun, 27 Sep 2026 12:55:33 GMT",
+                "keep-alive": "timeout=5",
+                "transfer-encoding": "chunked"
+              },
+              "body": "{\"error\":\"Route not found\"}",
+              "truncated": false
+            },
+            "assertions": [
+              {
+                "kind": "status",
+                "equals": 404,
+                "actual": 404,
+                "passed": true
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "GET /quote/ (trailing slash)",
+            "request": {
+              "method": "GET",
+              "path": "/quote/",
+              "headers": {},
+              "body": null
+            },
+            "response": {
+              "status": 404,
+              "headers": {
+                "connection": "keep-alive",
+                "content-type": "application/json",
+                "date": "Sun, 27 Sep 2026 12:55:33 GMT",
+                "keep-alive": "timeout=5",
+                "transfer-encoding": "chunked"
+              },
+              "body": "{\"error\":\"Route not found\"}",
+              "truncated": false
+            },
+            "assertions": [
+              {
+                "kind": "status",
+                "equals": 404,
+                "actual": 404,
+                "passed": true
+              }
+            ],
+            "error": null
+          }
+        ],
+        "failedAssertions": 0,
+        "incomplete": 0,
+        "durationMs": 89,
+        "logs": "[stdout] Shipping service ready\n",
+        "contractHash": "21c2b7f6ca2b1e057d3d0fa2f6173653ee650a951d122f8f01ee3b0f4cb086ec"
+      },
+      {
+        "id": "http-5",
+        "title": "GET / serves the HTML checkout page",
+        "intent": "Confirm the homepage returns the HTML form with correct content-type",
+        "expected": "Status 200, content-type text/html, body contains the form",
+        "basis": "documented",
+        "category": "normal",
+        "outcome": "passed",
+        "trace": [
+          {
+            "label": "GET /",
+            "request": {
+              "method": "GET",
+              "path": "/",
+              "headers": {},
+              "body": null
+            },
+            "response": {
+              "status": 200,
+              "headers": {
+                "connection": "keep-alive",
+                "content-length": "1108",
+                "content-type": "text/html; charset=utf-8",
+                "date": "Sun, 27 Sep 2026 12:55:37 GMT",
+                "keep-alive": "timeout=5"
+              },
+              "body": "<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><title>Shipping quote</title><style>body{font:18px system-ui;color:#23372e;background:#f5f5ef;margin:80px auto;max-width:560px}main{background:white;padding:40px;border:1px solid #dde3db;border-radius:8px}input,button{font:inherit;padding:12px}button{background:#2e5747;color:white;border:0}label{display:block;margin:24px 0 8px}output{display:block;margin-top:24px}</style><main><small>CHECKOUT</small><h1>Know your total.</h1><p>Delivery is $5. Orders of $100 or more ship free.</p><form><label for=\"subtotal\">Order subtotal ($)</label><input id=\"subtotal\" name=\"subtotal\" type=\"number\" step=\"0.01\" value=\"100\" required><button>Get quote</button></form><output aria-live=\"polite\" id=\"quote\"></output></main><script>document.querySelector('form').onsubmit=async e=>{e.preventDefault();const r=await fetch('/quote?subtotal='+encodeURIComponent(document.querySelector('#subtotal').value));const q=await r.json();document.querySelector('#quote').textContent=q.error||('Delivery: $'+q.shipping.toFixed(2)+' · Total: $'+q.total.toFixed(2));};</script></html>",
+              "truncated": false
+            },
+            "assertions": [
+              {
+                "kind": "status",
+                "equals": 200,
+                "actual": 200,
+                "passed": true
+              },
+              {
+                "kind": "header",
+                "name": "content-type",
+                "equals": "text/html; charset=utf-8",
+                "actual": "text/html; charset=utf-8",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "<form>",
+                "actual": "<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><title>Shipping quote</title><style>body{font:18px system-ui;color:#23372e;background:#f5f5ef;margin:80px auto;max-width:560px}main{background:white;padding:40px;border:1px solid #dde3db;border-radius:8px}input,button{font:inherit;padding:12px}button{background:#2e5747;color:white;border:0}label{display:block;margin:24px 0 8px}output{display:block;margin-top:24px}</style><main><small>CHECKOUT</small><h1>Know your total.</h1><p>Delivery is $5. Orders of $100 or more ship free.</p><form><label for=\"subtotal\">Order subtotal ($)</label><input id=\"subtotal\" name=\"subtotal\" type=\"number\" step=\"0.01\" value=\"100\" required><button>Get quote</button></form><output aria-live=\"polite\" id=\"quote\"></output></main><script>document.querySelector('form').onsubmit=async e=>{e.preventDefault();const r=await fetch('/quote?subtotal='+encodeURIComponent(document.querySelector('#subtotal').value));const q=await r.json();document.querySelector('#quote').textContent=q.error||('Delivery: $'+q.shipping.toFixed(2)+' · Total: $'+q.total.toFixed(2));};</script></html>",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "subtotal",
+                "actual": "<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><title>Shipping quote</title><style>body{font:18px system-ui;color:#23372e;background:#f5f5ef;margin:80px auto;max-width:560px}main{background:white;padding:40px;border:1px solid #dde3db;border-radius:8px}input,button{font:inherit;padding:12px}button{background:#2e5747;color:white;border:0}label{display:block;margin:24px 0 8px}output{display:block;margin-top:24px}</style><main><small>CHECKOUT</small><h1>Know your total.</h1><p>Delivery is $5. Orders of $100 or more ship free.</p><form><label for=\"subtotal\">Order subtotal ($)</label><input id=\"subtotal\" name=\"subtotal\" type=\"number\" step=\"0.01\" value=\"100\" required><button>Get quote</button></form><output aria-live=\"polite\" id=\"quote\"></output></main><script>document.querySelector('form').onsubmit=async e=>{e.preventDefault();const r=await fetch('/quote?subtotal='+encodeURIComponent(document.querySelector('#subtotal').value));const q=await r.json();document.querySelector('#quote').textContent=q.error||('Delivery: $'+q.shipping.toFixed(2)+' · Total: $'+q.total.toFixed(2));};</script></html>",
+                "passed": true
+              }
+            ],
+            "error": null
+          }
+        ],
+        "failedAssertions": 0,
+        "incomplete": 0,
+        "durationMs": 111,
+        "logs": "[stdout] Shipping service ready\n",
+        "contractHash": "b3044b7617f736aa6a0f9f27f5fc259837a464b9267d6f7b9d8a5298686218b4"
+      },
+      {
+        "id": "http-6",
+        "title": "Content-type is application/json on API responses",
+        "intent": "Ensure the API sets the correct content-type header for both success and error responses",
+        "expected": "content-type: application/json on 200 and 400 responses",
+        "basis": "documented",
+        "category": "normal",
+        "outcome": "passed",
+        "trace": [
+          {
+            "label": "Successful quote content-type",
+            "request": {
+              "method": "GET",
+              "path": "/quote?subtotal=50",
+              "headers": {},
+              "body": null
+            },
+            "response": {
+              "status": 200,
+              "headers": {
+                "connection": "keep-alive",
+                "content-type": "application/json",
+                "date": "Sun, 27 Sep 2026 12:55:37 GMT",
+                "keep-alive": "timeout=5",
+                "transfer-encoding": "chunked"
+              },
+              "body": "{\"subtotal\":50,\"shipping\":5,\"total\":55}",
+              "truncated": false
+            },
+            "assertions": [
+              {
+                "kind": "status",
+                "equals": 200,
+                "actual": 200,
+                "passed": true
+              },
+              {
+                "kind": "header",
+                "name": "content-type",
+                "equals": "application/json",
+                "actual": "application/json",
+                "passed": true
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "Error response content-type",
+            "request": {
+              "method": "GET",
+              "path": "/quote?subtotal=0",
+              "headers": {},
+              "body": null
+            },
+            "response": {
+              "status": 400,
+              "headers": {
+                "connection": "keep-alive",
+                "content-type": "application/json",
+                "date": "Sun, 27 Sep 2026 12:55:37 GMT",
+                "keep-alive": "timeout=5",
+                "transfer-encoding": "chunked"
+              },
+              "body": "{\"error\":\"Subtotal must be a number greater than 0 and at most 10000\"}",
+              "truncated": false
+            },
+            "assertions": [
+              {
+                "kind": "status",
+                "equals": 400,
+                "actual": 400,
+                "passed": true
+              },
+              {
+                "kind": "header",
+                "name": "content-type",
+                "equals": "application/json",
+                "actual": "application/json",
+                "passed": true
+              }
+            ],
+            "error": null
+          }
+        ],
+        "failedAssertions": 0,
+        "incomplete": 0,
+        "durationMs": 121,
+        "logs": "[stdout] Shipping service ready\n",
+        "contractHash": "6fd73083be10e45c3da392938d3994a5b4135d55b1b89e20a787882059dfe361"
+      },
+      {
+        "id": "adversarial-0",
+        "title": "Malformed and unexpected inputs: POST /quote",
+        "intent": "Exercise malformed JSON, null, arrays, missing values, unexpected types and numeric boundaries. Detect unhandled HTTP 5xx responses.",
+        "expected": "Bad inputs are handled without an unhandled server error. Exact domain rejection status is not assumed.",
+        "basis": "assumption",
+        "category": "input-validation",
+        "outcome": "passed",
+        "trace": [
+          {
+            "label": "Malformed JSON",
+            "request": {
+              "method": "POST",
+              "path": "/quote",
+              "headers": {
+                "content-type": "application/json"
+              },
+              "body": "{\"broken\":"
+            },
+            "response": {
+              "status": 404,
+              "headers": {
+                "connection": "keep-alive",
+                "content-type": "application/json",
+                "date": "Sun, 27 Sep 2026 12:55:40 GMT",
+                "keep-alive": "timeout=5",
+                "transfer-encoding": "chunked"
+              },
+              "body": "{\"error\":\"Route not found\"}",
+              "truncated": false
+            },
+            "assertions": [
+              {
+                "kind": "not5xx",
+                "actual": 404,
+                "passed": true
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "Unexpected input 0",
+            "request": {
+              "method": "POST",
+              "path": "/quote",
+              "headers": {
+                "content-type": "application/json"
+              },
+              "body": "null"
+            },
+            "response": {
+              "status": 404,
+              "headers": {
+                "connection": "keep-alive",
+                "content-type": "application/json",
+                "date": "Sun, 27 Sep 2026 12:55:40 GMT",
+                "keep-alive": "timeout=5",
+                "transfer-encoding": "chunked"
+              },
+              "body": "{\"error\":\"Route not found\"}",
+              "truncated": false
+            },
+            "assertions": [
+              {
+                "kind": "not5xx",
+                "actual": 404,
+                "passed": true
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "Unexpected input 1",
+            "request": {
+              "method": "POST",
+              "path": "/quote",
+              "headers": {
+                "content-type": "application/json"
+              },
+              "body": "[]"
+            },
+            "response": {
+              "status": 404,
+              "headers": {
+                "connection": "keep-alive",
+                "content-type": "application/json",
+                "date": "Sun, 27 Sep 2026 12:55:40 GMT",
+                "keep-alive": "timeout=5",
+                "transfer-encoding": "chunked"
+              },
+              "body": "{\"error\":\"Route not found\"}",
+              "truncated": false
+            },
+            "assertions": [
+              {
+                "kind": "not5xx",
+                "actual": 404,
+                "passed": true
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "Unexpected input 2",
+            "request": {
+              "method": "POST",
+              "path": "/quote",
+              "headers": {
+                "content-type": "application/json"
+              },
+              "body": "{}"
+            },
+            "response": {
+              "status": 404,
+              "headers": {
+                "connection": "keep-alive",
+                "content-type": "application/json",
+                "date": "Sun, 27 Sep 2026 12:55:40 GMT",
+                "keep-alive": "timeout=5",
+                "transfer-encoding": "chunked"
+              },
+              "body": "{\"error\":\"Route not found\"}",
+              "truncated": false
+            },
+            "assertions": [
+              {
+                "kind": "not5xx",
+                "actual": 404,
+                "passed": true
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "Unexpected input 3",
+            "request": {
+              "method": "POST",
+              "path": "/quote",
+              "headers": {
+                "content-type": "application/json"
+              },
+              "body": "\"unexpected\""
+            },
+            "response": {
+              "status": 404,
+              "headers": {
+                "connection": "keep-alive",
+                "content-type": "application/json",
+                "date": "Sun, 27 Sep 2026 12:55:40 GMT",
+                "keep-alive": "timeout=5",
+                "transfer-encoding": "chunked"
+              },
+              "body": "{\"error\":\"Route not found\"}",
+              "truncated": false
+            },
+            "assertions": [
+              {
+                "kind": "not5xx",
+                "actual": 404,
+                "passed": true
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "Unexpected input 4",
+            "request": {
+              "method": "POST",
+              "path": "/quote",
+              "headers": {
+                "content-type": "application/json"
+              },
+              "body": "{}"
+            },
+            "response": {
+              "status": 404,
+              "headers": {
+                "connection": "keep-alive",
+                "content-type": "application/json",
+                "date": "Sun, 27 Sep 2026 12:55:40 GMT",
+                "keep-alive": "timeout=5",
+                "transfer-encoding": "chunked"
+              },
+              "body": "{\"error\":\"Route not found\"}",
+              "truncated": false
+            },
+            "assertions": [
+              {
+                "kind": "not5xx",
+                "actual": 404,
+                "passed": true
+              }
+            ],
+            "error": null
+          }
+        ],
+        "failedAssertions": 0,
+        "incomplete": 0,
+        "durationMs": 107,
+        "logs": "[stdout] Shipping service ready\n",
+        "contractHash": "006c3b0e2378c8a795662ca896ebaab9271ee50a5e6e3097088188255f73f716"
+      },
+      {
+        "id": "browser-1",
+        "title": "Happy-path quote submission",
+        "intent": "User enters a valid subtotal, submits the form, and sees the delivery charge and total",
+        "expected": "Output element shows Delivery and Total values matching the API response",
+        "basis": "documented",
+        "category": "frontend",
+        "outcome": "passed",
+        "trace": [
+          {
+            "action": {
+              "action": "goto",
+              "path": "/"
+            },
+            "error": null
+          },
+          {
+            "action": {
+              "action": "visible",
+              "selector": "form"
+            },
+            "error": null
+          },
+          {
+            "action": {
+              "action": "fill",
+              "selector": "#subtotal",
+              "value": "50"
+            },
+            "error": null
+          },
+          {
+            "action": {
+              "action": "click",
+              "selector": "button"
+            },
+            "error": null
+          },
+          {
+            "action": {
+              "action": "text",
+              "selector": "#quote",
+              "value": "Delivery: $5.00"
+            },
+            "error": null
+          },
+          {
+            "action": {
+              "action": "text",
+              "selector": "#quote",
+              "value": "Total: $55.00"
+            },
+            "error": null
+          }
+        ],
+        "errors": [],
+        "observations": [],
+        "requests": [],
+        "network": [
+          {
+            "action": {
+              "action": "goto",
+              "path": "/"
+            },
+            "url": "http://127.0.0.1:3100/",
+            "method": "GET",
+            "status": 200
+          },
+          {
+            "action": {
+              "action": "text",
+              "selector": "#quote",
+              "value": "Delivery: $5.00"
+            },
+            "url": "http://127.0.0.1:3100/quote?subtotal=50",
+            "method": "GET",
+            "status": 200
+          }
+        ],
+        "durationMs": 369,
+        "screenshot": "proofrun-9328f562-2e5-browser-1-final.png",
+        "limitations": [],
+        "logs": "[stdout] Shipping service ready\n",
+        "contractHash": "84a6359d76e397493634859908720ac6b61113344f9e80fed021a42c88a0ac6b"
+      },
+      {
+        "id": "browser-2",
+        "title": "Free-shipping boundary quote in browser",
+        "intent": "Submit subtotal=150 and verify the form displays zero shipping cost",
+        "expected": "Output shows Delivery: $0.00 and Total: $150.00",
+        "basis": "documented",
+        "category": "frontend",
+        "outcome": "passed",
+        "trace": [
+          {
+            "action": {
+              "action": "goto",
+              "path": "/"
+            },
+            "error": null
+          },
+          {
+            "action": {
+              "action": "fill",
+              "selector": "#subtotal",
+              "value": "150"
+            },
+            "error": null
+          },
+          {
+            "action": {
+              "action": "click",
+              "selector": "button"
+            },
+            "error": null
+          },
+          {
+            "action": {
+              "action": "text",
+              "selector": "#quote",
+              "value": "Delivery: $0.00"
+            },
+            "error": null
+          },
+          {
+            "action": {
+              "action": "text",
+              "selector": "#quote",
+              "value": "Total: $150.00"
+            },
+            "error": null
+          }
+        ],
+        "errors": [],
+        "observations": [],
+        "requests": [],
+        "network": [
+          {
+            "action": {
+              "action": "goto",
+              "path": "/"
+            },
+            "url": "http://127.0.0.1:3100/",
+            "method": "GET",
+            "status": 200
+          },
+          {
+            "action": {
+              "action": "text",
+              "selector": "#quote",
+              "value": "Delivery: $0.00"
+            },
+            "url": "http://127.0.0.1:3100/quote?subtotal=150",
+            "method": "GET",
+            "status": 200
+          }
+        ],
+        "durationMs": 396,
+        "screenshot": "proofrun-6c1c20aa-491-browser-2-final.png",
+        "limitations": [],
+        "logs": "[stdout] Shipping service ready\n",
+        "contractHash": "592d6ec307d13b619a3cb1982fe60261944dde03a44244293117245c346694c4"
+      },
+      {
+        "id": "browser-3",
+        "title": "Missing subtotal triggers native browser validation",
+        "intent": "Clear the required number input and attempt submission; native validation must block the request",
+        "expected": "#subtotal is in an invalid state and no network request is made",
+        "basis": "documented",
+        "category": "frontend",
+        "outcome": "passed",
+        "trace": [
+          {
+            "action": {
+              "action": "goto",
+              "path": "/"
+            },
+            "error": null
+          },
+          {
+            "action": {
+              "action": "fill",
+              "selector": "#subtotal",
+              "value": ""
+            },
+            "error": null
+          },
+          {
+            "action": {
+              "action": "click",
+              "selector": "button"
+            },
+            "error": null
+          },
+          {
+            "action": {
+              "action": "invalid",
+              "selector": "#subtotal"
+            },
+            "error": null,
+            "validation": {
+              "valid": false,
+              "willValidate": true,
+              "message": "Please fill out this field.",
+              "value": ""
+            }
+          }
+        ],
+        "errors": [],
+        "observations": [],
+        "requests": [],
+        "network": [
+          {
+            "action": {
+              "action": "goto",
+              "path": "/"
+            },
+            "url": "http://127.0.0.1:3100/",
+            "method": "GET",
+            "status": 200
+          }
+        ],
+        "durationMs": 389,
+        "screenshot": "proofrun-8c3f9216-903-browser-3-final.png",
+        "limitations": [],
+        "logs": "[stdout] Shipping service ready\n",
+        "contractHash": "ac4c14a5ea48f5a8aa54e54eb72b78a0c2408e4daa7c4f195b562869f486ea5b"
+      }
+    ],
+    "existingTests": [
+      {
+        "argv": [
+          "node",
+          "--test",
+          "tests/*.test.mjs"
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "timedOut": false,
+        "stdout": "TAP version 13\n# Subtest: ordinary orders have a five dollar delivery charge\nok 1 - ordinary orders have a five dollar delivery charge\n  ---\n  duration_ms: 1.427691\n  type: 'test'\n  ...\n# Subtest: large orders ship free\nok 2 - large orders ship free\n  ---\n  duration_ms: 0.236565\n  type: 'test'\n  ...\n# Subtest: invalid amounts are rejected\nok 3 - invalid amounts are rejected\n  ---\n  duration_ms: 0.263272\n  type: 'test'\n  ...\n1..3\n# tests 3\n# suites 0\n# pass 3\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 71.537669\n",
+        "stderr": "",
+        "durationMs": 226,
+        "truncated": false,
+        "label": "Run unit tests",
+        "timeoutSeconds": 600,
+        "cwd": "."
+      }
+    ],
+    "resolved": true,
+    "regressions": []
+  },
+  "limitations": [
+    "No CI configuration file (e.g. .github/workflows) was present in the snapshot, so the runtime choice (node22) is based solely on the engines field in package.json (>=22).",
+    "index.html has no separate source file for its inline script — it cannot be linted or tested in isolation without extracting it.",
+    "There are no lint, coverage, or integration test scripts defined in package.json beyond the basic node --test suite.",
+    "The deliberate boundary defect (shipping.mjs uses `subtotal > 100` instead of `subtotal >= 100`) means http-2 is expected to fail until the defect is corrected; the test is intentionally designed to surface it.",
+    "index.html's inline <script> cannot be linted or unit-tested in isolation without extraction.",
+    "No authentication, sessions, or payment flow exist; those surfaces are not testable.",
+    "No CI configuration is present; runtime selection is based solely on the engines field in package.json.",
+    "AI-inferred expectations can be wrong; assumptions are labelled. This is measured coverage, not a guarantee of all defects.",
+    "Linux containers do not emulate proprietary hardware, native Windows/macOS UI or unavailable external services."
+  ]
+}

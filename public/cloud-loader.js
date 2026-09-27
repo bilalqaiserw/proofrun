@@ -1,5 +1,6 @@
 const panel=document.createElement('dialog');
 panel.innerHTML='<h2>Your private testing workspace</h2><p id="cloud-message">Enter the access code supplied by the project owner. Files stay in your isolated cloud session, which expires after 45 minutes.</p><form><label>Access code <input type="password" name="code" minlength="8" required autocomplete="off"></label><p><button class="primary-button">Start cloud workspace</button></p></form><p id="cloud-error" role="alert"></p>';
+panel.insertAdjacentHTML('beforeend','<p><a href="/evidence.html">View real recorded test &amp; repair evidence — no key needed</a></p>');
 document.body.append(panel);panel.showModal();
 panel.addEventListener('cancel',event=>event.preventDefault());
 const message=panel.querySelector('#cloud-message'),error=panel.querySelector('#cloud-error'),form=panel.querySelector('form');
