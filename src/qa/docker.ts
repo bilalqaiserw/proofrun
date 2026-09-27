@@ -518,8 +518,9 @@ class DockerSession implements Session {
       ...envArgs,
       // Setup and existing suites may spawn compilers/subprocesses. Two concurrent
       // jobs receive four CPUs each; independent prepared workflows get two each.
-      "--cpus",
-      this.options.snapshotVolume ? "2" : "4",
+      ...(process.env.PROOFRUN_CLOUD_VM === "1" ? [] : [
+        "--cpus", this.options.snapshotVolume ? "2" : "4",
+      ]),
       "--entrypoint",
       "/bin/sleep",
       image,
