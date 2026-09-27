@@ -32,7 +32,12 @@ export default async function handler(req, res) {
       }
       const sandbox = await Sandbox.get({name:session.name});
       const status = await sandbox.readFileToBuffer({path:'.cloud-status.json',cwd:sandbox.cwd});
-      return reply(200,status ? JSON.parse(status.toString()) : {ready:false,message:'Starting cloud environment…'});
+      if (!status) {
+        const diagnostic = await sandbox.runCommand({cmd:'node',args:['-e',"const fs=require('node:fs'); console.log(JSON.stringify({cwd:process.cwd(),bootstrap:fs.existsSync('cloud/bootstrap.mjs'),status:fs.existsSync('.cloud-status.json'),tmpStatus:fs.existsSync('/tmp/proofrun-cloud-status.json')}))"],cwd:sandbox.cwd,sudo:true,timeoutMs:10000});
+        console.log('Cloud bootstrap diagnostic',await diagnostic.stdout(),await diagnostic.stderr());
+        return reply(200,{ready:false,message:'Cloud environment is starting. Bootstrap diagnostics: '+(await diagnostic.stdout()).slice(0,400)});
+      }
+      return reply(200,JSON.parse(status.toString()));
     }
     if (!session) return reply(401,{error:'Cloud session expired. Refresh the page and enter your access code.'});
     const path = req.query.path;
