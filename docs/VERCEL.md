@@ -21,4 +21,4 @@ Import the repository, select Other, and retain vercel.json build/output setting
 
 ## Cloud resource enforcement
 
-The Vercel universal image uses a threaded cgroup root. It cannot delegate a memory controller to nested Docker containers. Cloud mode therefore enforces memory at the private Firecracker VM boundary (4 GiB hard cap), while Docker retains CPU and PID limits, dropped capabilities, read-only filesystems and isolated networks. Local mode keeps its 1536 MB per-container memory limit. Bootstrap must execute an actual restricted container successfully before declaring the environment ready.
+The Vercel universal image uses a threaded cgroup root. It cannot delegate a memory controller to nested Docker containers. Cloud mode therefore enforces memory and CPU at the private Firecracker VM boundary (4 GiB hard cap, 2 vCPUs), while Docker retains PID limits, dropped capabilities, read-only filesystems and isolated networks. Local mode keeps its 1536 MB per-container memory limit. Bootstrap must execute an actual restricted container successfully before declaring the environment ready.
