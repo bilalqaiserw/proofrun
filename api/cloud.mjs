@@ -2,6 +2,14 @@ import { Sandbox } from '@vercel/sandbox';
 import { randomUUID } from 'node:crypto';
 import { encodeSession, decodeSession, sign, validCode } from '../cloud/session.mjs';
 
+async function launch(sandbox, name, secret) {
+  const cwd = sandbox.cwd + '/proofrun';
+  const script = await sandbox.readFileToBuffer({path:'cloud/bootstrap.mjs',cwd});
+  if(!script) throw new Error('Repository checkout did not contain the cloud launcher.');
+  await sandbox.writeFiles([{path:cwd+'/.cloud-started',content:Buffer.from('started')}]);
+  await sandbox.runCommand({cmd:'node',args:['cloud/bootstrap.mjs'],cwd,sudo:true,detached:true,timeoutMs:45*60_000,
+    env:{BOBSHELL_API_KEY:process.env.BOBSHELL_API_KEY,BOB_TEAM_ID:process.env.BOB_TEAM_ID || '',BOB_MAX_COST:process.env.BOB_MAX_COST || '5',PROOFRUN_GATEWAY_KEY:sign(name,secret),PROOFRUN_BOB_ACCEPT_LICENSE:'1',PORT:'3000'}});
+}
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   const reply = (status, data) => res.status(status).json(data);
@@ -24,18 +32,17 @@ export default async function handler(req, res) {
           timeout:45 * 60_000, persistent:false, resources:{vcpus:2},
           source:{type:'git',url:'https://github.com/bilalqaiserw/proofrun.git',depth:1,revision:process.env.VERCEL_GIT_COMMIT_SHA || 'main'},
         });
-        await sandbox.runCommand({cmd:'node',args:['cloud/bootstrap.mjs'],cwd:sandbox.cwd,sudo:true,detached:true,timeoutMs:45*60_000,
-          env:{BOBSHELL_API_KEY:secret,BOB_TEAM_ID:process.env.BOB_TEAM_ID || '',BOB_MAX_COST:process.env.BOB_MAX_COST || '5',PROOFRUN_GATEWAY_KEY:sign(name,secret),PORT:'3000'}});
+        await launch(sandbox,name,secret);
         session = {name};
         res.setHeader('Set-Cookie', `proofrun_session=${encodeSession(name,secret)}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=2700`);
         return reply(202,{ready:false,message:'Preparing your private cloud testing environment. First startup installs Docker and IBM Bob.'});
       }
       const sandbox = await Sandbox.get({name:session.name});
-      const status = await sandbox.readFileToBuffer({path:'.cloud-status.json',cwd:sandbox.cwd});
+      const status = await sandbox.readFileToBuffer({path:'.cloud-status.json',cwd:sandbox.cwd+'/proofrun'});
       if (!status) {
-        const diagnostic = await sandbox.runCommand({cmd:'node',args:['-e',"const fs=require('node:fs'); console.log(JSON.stringify({cwd:process.cwd(),bootstrap:fs.existsSync('cloud/bootstrap.mjs'),status:fs.existsSync('.cloud-status.json'),tmpStatus:fs.existsSync('/tmp/proofrun-cloud-status.json')}))"],cwd:sandbox.cwd,sudo:true,timeoutMs:10000});
-        console.log('Cloud bootstrap diagnostic',await diagnostic.stdout(),await diagnostic.stderr());
-        return reply(200,{ready:false,message:'Cloud environment is starting. Bootstrap diagnostics: '+(await diagnostic.stdout()).slice(0,400)});
+        const marker=await sandbox.readFileToBuffer({path:'.cloud-started',cwd:sandbox.cwd+'/proofrun'});
+        if(!marker) await launch(sandbox,session.name,secret);
+        return reply(200,{ready:false,message:'Preparing Docker and IBM Bob in your private cloud workspace…'});
       }
       return reply(200,JSON.parse(status.toString()));
     }

@@ -119,6 +119,7 @@ export class BobReasoner implements Reasoner {
       "--workspace",
       this.workspace,
     ];
+    if (process.env.PROOFRUN_BOB_ACCEPT_LICENSE === "1") args.push("--accept-license");
     if (process.env.BOB_TEAM_ID)
       args.push("--team-id", process.env.BOB_TEAM_ID);
     const invoke = async (input: string) => {

@@ -22,7 +22,7 @@ try {
   if(existsSync(ca)) {process.env.NODE_EXTRA_CA_CERTS=ca;process.env.PROOFRUN_CONTAINER_CA=ca;}
   await status({ready:false,message:'Installing IBM Bob Shell and accepting the owner-approved license…'});
   await command('node',['scripts/install-bob.mjs']);
-  await command('node',['scripts/bob-cli.mjs','--accept-license']);
+  process.env.PROOFRUN_BOB_ACCEPT_LICENSE='1';
   await status({ready:false,message:'Starting the testing engine…'});
   const gateway=spawn('node',['cloud/gateway.mjs'],{cwd,env:process.env,stdio:'inherit'});
   gateway.on('error',()=>{});
