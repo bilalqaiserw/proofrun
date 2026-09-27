@@ -21,6 +21,17 @@ export default async function handler(req, res) {
     const cookies = Object.fromEntries((req.headers.cookie || '').split(';').map(c => c.trim().split('=')));
     let session = decodeSession(cookies.proofrun_session || '', secret);
     const action = req.query.action;
+    if (action === 'restart') {
+      if(req.method!=='POST' || req.headers['x-proofrun']!=='1')return reply(403,{error:'Workspace request required.'});
+      if(session) {
+        const sandbox=await Sandbox.get({name:session.name});
+        const status=await sandbox.readFileToBuffer({path:'.cloud-status.json',cwd:sandbox.cwd+'/proofrun'});
+        if(!status || !JSON.parse(status.toString()).failed)return reply(409,{error:'Only failed setup sessions can be restarted. Running projects are preserved.'});
+        await sandbox.stop();
+      }
+      res.setHeader('Set-Cookie','proofrun_session=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0');
+      return reply(200,{ok:true});
+    }
     if (action === 'init') {
       if (req.method !== 'POST' || req.headers['x-proofrun'] !== '1') return reply(403, {error:'Workspace request required.'});
       if (typeof req.body === 'string') req.body = JSON.parse(req.body);

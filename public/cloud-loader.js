@@ -3,6 +3,8 @@ panel.innerHTML='<h2>Your private testing workspace</h2><p id="cloud-message">En
 panel.insertAdjacentHTML('beforeend','<p><a href="/evidence.html">View real recorded test &amp; repair evidence — no key needed</a></p>');
 document.body.append(panel);panel.showModal();
 panel.addEventListener('cancel',event=>event.preventDefault());
+const restart=document.createElement('button');restart.className='secondary-button';restart.textContent='Restart failed cloud setup';restart.hidden=true;panel.append(restart);
+restart.addEventListener('click',async()=>{restart.disabled=true;try{const response=await fetch('/api/cloud?action=restart',{method:'POST',headers:{'x-proofrun':'1','content-type':'application/json'},body:'{}'});const data=await response.json();if(!response.ok)throw new Error(data.error);location.reload();}catch(e){error.textContent=e.message;restart.disabled=false;}});
 const message=panel.querySelector('#cloud-message'),error=panel.querySelector('#cloud-error'),form=panel.querySelector('form');
 async function connect(code) {
   const response=await fetch('/api/cloud?action=init',{method:'POST',headers:{'content-type':'application/json','x-proofrun':'1'},body:JSON.stringify({code})});
@@ -12,7 +14,7 @@ async function wait(code) {
   let data=await connect(code);form.hidden=true;
   for(let attempt=0;attempt<180;attempt++) {
     message.textContent=data.message;
-    if(data.failed)throw new Error(data.message);
+    if(data.failed){restart.hidden=false;throw new Error(data.message);}
     if(data.ready){panel.close();panel.remove();await import('./workbench.js');return;}
     await new Promise(resolve=>setTimeout(resolve,4000));data=await connect();
   }
